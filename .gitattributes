@@ -1,0 +1,5 @@
+/mvnw text eol=lf
+*.cmd text eol=crlf
+compose.yaml text eol=lf
+.gitattributes text eol=lf
+pom.xml text eol=lf
