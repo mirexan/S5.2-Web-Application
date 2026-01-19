@@ -3,9 +3,11 @@ package com.boticarium.backend.domain.model;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Data
 @Table(name = "users")
 @AllArgsConstructor
 @NoArgsConstructor
