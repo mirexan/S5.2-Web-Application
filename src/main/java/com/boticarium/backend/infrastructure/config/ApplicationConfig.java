@@ -23,7 +23,7 @@ public class ApplicationConfig {
 		return username -> userRepository.findByUsername(username)
 				.map(user -> org.springframework.security.core.userdetails.User
 						.builder()
-						.username(user.getUserName())
+						.username(user.getUsername())
 						.password(user.getPassword())
 						.roles(user.getRole().name())
 						.build())
