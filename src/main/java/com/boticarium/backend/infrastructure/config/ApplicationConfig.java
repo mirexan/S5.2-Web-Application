@@ -21,15 +21,8 @@ public class ApplicationConfig {
 	@Bean
 	public UserDetailsService userDetailsService() {
 		return username -> userRepository.findByUsername(username)
-				.map(user -> org.springframework.security.core.userdetails.User
-						.builder()
-						.username(user.getUsername())
-						.password(user.getPassword())
-						.roles(user.getRole().name())
-						.build())
 				.orElseThrow(() -> new UsernameNotFoundException("User not found"));
 	}
-
 	@Bean
 	public AuthenticationProvider authenticationProvider() {
 		DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
