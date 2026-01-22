@@ -1,7 +1,7 @@
 package com.boticarium.backend.infrastructure.inbound.controller;
 
 import com.boticarium.backend.application.dto.auth.AuthResponse;
-import com.boticarium.backend.application.dto.auth.RegisterRequest;
+import com.boticarium.backend.application.dto.user.RegisterRequest;
 import com.boticarium.backend.application.service.AuthenticationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

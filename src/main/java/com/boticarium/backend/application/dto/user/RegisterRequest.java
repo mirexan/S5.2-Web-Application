@@ -1,4 +1,4 @@
-package com.boticarium.backend.application.dto.auth;
+package com.boticarium.backend.application.dto.user;
 
 import jakarta.validation.constraints.*;
 

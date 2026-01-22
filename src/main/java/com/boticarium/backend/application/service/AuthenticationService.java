@@ -2,7 +2,7 @@ package com.boticarium.backend.application.service;
 
 import com.boticarium.backend.application.dto.auth.AuthResponse;
 import com.boticarium.backend.application.dto.auth.LoginRequest;
-import com.boticarium.backend.application.dto.auth.RegisterRequest;
+import com.boticarium.backend.application.dto.user.RegisterRequest;
 import com.boticarium.backend.domain.model.Role;
 import com.boticarium.backend.domain.model.User;
 import com.boticarium.backend.infrastructure.config.JwtService;
@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
