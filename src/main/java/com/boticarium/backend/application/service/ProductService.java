@@ -17,12 +17,11 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ProductService {
-	private final ProductRepository repository;
 	private final ProductMapper mapper;
-	private final com.boticarium.backend.application.service.ProductRepository productRepository;
+	private final ProductRepository repository;
 
 	public List<ProductResponse> getAllProductsPublic() {
-		return productRepository.findAll().stream()
+		return repository.findAll().stream()
 				.map(mapper::toPublicResponse)
 				.collect(Collectors.toList());
 	}
@@ -32,7 +31,7 @@ public class ProductService {
 	}
 
 	public List<ProductAdminResponse> getAllProductsAdmin() {
-		return productRepository.findAll().stream()
+		return repository.findAll().stream()
 				.map(mapper::toAdminResponse)
 				.collect(Collectors.toList());
 	}
@@ -64,7 +63,7 @@ public class ProductService {
 	}
 
 	private Product findProductOrThrow(Long id) {
-		return productRepository.findById(id)
+		return repository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("Product not found with id " + id));
 	}
 

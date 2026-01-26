@@ -58,7 +58,7 @@ public class ProductMapper {
 				.discountLevel1(request.discountLevel1() != null ? request.discountLevel1():0)
 				.discountLevel2(request.discountLevel2() != null ? request.discountLevel2():0)
 				.discountLevel3(request.discountLevel3()!= null ? request.discountLevel3():0)
-				.stockStatus(StockStatus.AVAIBLE)
+				.stockStatus(StockStatus.AVAILABLE)
 				.additionalAttributes(request.additionalAttributes())
 				.build();
 	}

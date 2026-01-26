@@ -99,4 +99,9 @@ public class Product {
 				.multiply(BigDecimal.valueOf(100))
 				.setScale(2, RoundingMode.HALF_UP);
 	}
+	public void validateStock(){
+		if (this.stockStatus == StockStatus.OUT_OF_STOCK){
+			throw new IllegalStateException(this.name + " is out of stock");
+		}
+	}
 }

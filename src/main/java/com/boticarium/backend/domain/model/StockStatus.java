@@ -1,6 +1,6 @@
 package com.boticarium.backend.domain.model;
 
 public enum StockStatus {
-	AVAIBLE,
+	AVAILABLE,
 	OUT_OF_STOCK
 }
