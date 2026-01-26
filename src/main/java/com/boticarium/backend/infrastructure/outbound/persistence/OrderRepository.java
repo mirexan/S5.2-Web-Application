@@ -1,4 +1,4 @@
-package com.boticarium.backend.infrastructure.outbound.persistance;
+package com.boticarium.backend.infrastructure.outbound.persistence;
 
 import com.boticarium.backend.domain.model.Order;
 import org.springframework.data.jpa.repository.JpaRepository;
