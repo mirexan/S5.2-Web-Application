@@ -103,22 +103,29 @@ public class Product {
 				.multiply(BigDecimal.valueOf(100))
 				.setScale(2, RoundingMode.HALF_UP);
 	}
-	public void validateStock(){
-		if (this.stockStatus == StockStatus.OUT_OF_STOCK){
-			throw new IllegalStateException(this.name + " is out of stock");
-		}
-	}
-	public void decreaseStock(Integer requestedQuantity){
-		validateStock();
-		if (this.stockQuantity < requestedQuantity){
+	private void validateStock(Integer requestedQuantity){
+		if (this.stockStatus == StockStatus.OUT_OF_STOCK || this.stockQuantity < requestedQuantity){
 			throw new IllegalStateException("Theres is not enought stock left.\n" +
 					"Requested : " + requestedQuantity +
 					"\n Available : " + stockQuantity);
 		}
-		this.stockQuantity -= requestedQuantity;
-		if (this.stockQuantity <= 0){
-			this.stockQuantity = 0;
-			this.stockStatus = StockStatus.OUT_OF_STOCK;
+	}
+	@PrePersist
+	@PreUpdate
+	public void normalizeStockStatus(){
+		if (this.stockQuantity == null){
+			return;
 		}
+		if (this.stockQuantity > 0){
+			this.stockStatus = StockStatus.AVAILABLE;
+			return;
+		}
+		this.stockQuantity = 0;
+		this.stockStatus = StockStatus.OUT_OF_STOCK;
+	}
+	public void decreaseStock(Integer requestedQuantity){
+		validateStock(requestedQuantity);
+		this.stockQuantity -= requestedQuantity;
+		normalizeStockStatus();
 	}
 }

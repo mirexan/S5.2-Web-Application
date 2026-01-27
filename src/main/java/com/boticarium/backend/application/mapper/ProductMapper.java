@@ -48,6 +48,7 @@ public class ProductMapper {
 		);
 	}
 	public Product toProductEntity(ProductRequest request){
+
 		return Product.builder()
 				.name(request.name())
 				.description(request.description())
@@ -60,10 +61,15 @@ public class ProductMapper {
 				.discountLevel2(request.discountLevel2() != null ? request.discountLevel2():0)
 				.discountLevel3(request.discountLevel3()!= null ? request.discountLevel3():0)
 				.stockQuantity(request.stockQuantity() != null ? request.stockQuantity() : 0)
-				.stockStatus(StockStatus.AVAILABLE)
+				.stockStatus(calculateStockStatus(request))
 				.additionalAttributes(request.additionalAttributes())
 				.build();
 	}
+	private StockStatus calculateStockStatus(ProductRequest request){
+		int quantity = request.stockQuantity() != null? request.stockQuantity() : 0;
+		return (quantity > 0)?StockStatus.AVAILABLE:StockStatus.OUT_OF_STOCK;
+	}
+
 	public void updateProductFromRequest(Product existing, ProductRequest request){
 		updateIfNotNull(request.name(),existing::setName);
 		updateIfNotNull(request.description(),existing::setDescription);
@@ -77,10 +83,6 @@ public class ProductMapper {
 		updateIfNotNull(request.ingredients(),existing::setIngredients);
 		updateIfNotNull(request.usageInstructions(),existing::setUsageInstructions);
 		updateIfNotNull(request.additionalAttributes(),existing::setAdditionalAttributes);
-
-		if (request.stockStatus() != null){
-			existing.setStockStatus(StockStatus.valueOf(request.stockStatus()));
-		}
 	}
 	private <T> void updateIfNotNull(T value, Consumer<T> setter){
 		if (value != null){

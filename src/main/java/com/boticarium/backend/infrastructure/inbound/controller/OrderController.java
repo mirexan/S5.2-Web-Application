@@ -2,6 +2,7 @@ package com.boticarium.backend.infrastructure.inbound.controller;
 
 import com.boticarium.backend.application.dto.order.OrderRequest;
 import com.boticarium.backend.application.dto.order.OrderResponse;
+import com.boticarium.backend.application.dto.order.OrderStatusRequest;
 import com.boticarium.backend.application.service.OrderService;
 import com.boticarium.backend.domain.model.User;
 import jakarta.validation.Valid;
@@ -34,5 +35,11 @@ public class OrderController {
 	@GetMapping("/management")
 	public ResponseEntity<List<OrderResponse>> getAllOrdersHistoryAdmin(){
 		return ResponseEntity.ok(orderService.getAllOrders());
+	}
+
+	@PatchMapping("/management/{id}/status")
+	public ResponseEntity<OrderResponse> updateStatus(@PathVariable Long id,
+													  @RequestBody @Valid OrderStatusRequest request){
+		return ResponseEntity.ok(orderService.updateOrderStatus(id, request.status()));
 	}
 }

@@ -26,7 +26,7 @@ public class OrderService {
 
 	@Transactional
 	public OrderResponse createOrder(Long userId,OrderRequest request) {
-		User user = finUserOrThrow(userId);
+		User user = findUserOrThrow(userId);
 		Order order = initializeOrder(user);
 		request.items().forEach(itemRequest -> {
 			order.addItem(processOrderItem(itemRequest));
@@ -36,7 +36,7 @@ public class OrderService {
 	}
 
 	public List<OrderResponse> getMyOrders(Long userId) {
-		return orderRepository.findUserById(userId).stream()
+		return orderRepository.findAllByUserId(userId).stream()
 				.map(orderMapper::toOrderResponse)
 				.collect(Collectors.toList());
 	}
@@ -46,7 +46,15 @@ public class OrderService {
 				.collect(Collectors.toList());
 	}
 
-	private User finUserOrThrow(Long userId) {
+	public OrderResponse updateOrderStatus(Long orderId, OrderStatus newStatus){
+		Order orderToUpdate = orderRepository.findById(orderId)
+				.orElseThrow(() -> new EntityNotFoundException("Order id : " + orderId
+						+ " not found"));
+		orderToUpdate.setStatus(newStatus);
+		return orderMapper.toOrderResponse(orderRepository.save(orderToUpdate));
+	}
+
+	private User findUserOrThrow(Long userId) {
 		return userRepository.findById(userId)
 				.orElseThrow(()-> new EntityNotFoundException("User not found"));
 	}
@@ -59,7 +67,8 @@ public class OrderService {
 	private OrderItem processOrderItem(OrderItemRequest itemRequest){
 		Product newProduct = productRepository.findById(itemRequest.productId())
 				.orElseThrow(()-> new EntityNotFoundException("Product not found"));
-		newProduct.validateStock();
+		newProduct.decreaseStock(itemRequest.quantity());
+		productRepository.save(newProduct);
 		return OrderItem.builder()
 				.product(newProduct)
 				.quantity(itemRequest.quantity())

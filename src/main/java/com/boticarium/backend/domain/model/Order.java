@@ -45,6 +45,9 @@ public class Order {
 	private LocalDateTime updatedAt;
 
 	public void addItem(OrderItem item) {
+		if (this.items == null) {
+			this.items = new ArrayList<>();
+		}
 		items.add(item);
 		item.setOrder(this);
 	}
