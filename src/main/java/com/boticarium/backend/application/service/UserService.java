@@ -3,7 +3,7 @@ package com.boticarium.backend.application.service;
 import com.boticarium.backend.application.dto.user.UserResponse;
 import com.boticarium.backend.domain.model.Role;
 import com.boticarium.backend.domain.model.User;
-import com.boticarium.backend.infrastructure.outbound.persistance.UserRepository;
+import com.boticarium.backend.infrastructure.outbound.persistence.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;

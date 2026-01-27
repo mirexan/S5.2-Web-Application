@@ -5,7 +5,7 @@ import com.boticarium.backend.application.dto.product.ProductRequest;
 import com.boticarium.backend.application.dto.product.ProductResponse;
 import com.boticarium.backend.application.mapper.ProductMapper;
 import com.boticarium.backend.domain.model.Product;
-import com.boticarium.backend.infrastructure.outbound.persistance.ProductRepository;
+import com.boticarium.backend.infrastructure.outbound.persistence.ProductRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

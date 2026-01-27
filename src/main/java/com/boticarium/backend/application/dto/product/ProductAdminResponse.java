@@ -20,6 +20,7 @@ public record ProductAdminResponse (
 		Integer discountLevel2,
 		Integer discountLevel3,
 
+		Integer stockQuantity,
 		String stockStatus,
 		LocalDateTime createdAt,
 		LocalDateTime updatedAt,

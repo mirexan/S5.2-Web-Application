@@ -48,8 +48,12 @@ public class Product {
 	@Builder.Default
 	private Integer discountLevel3 = 0;
 
+	@Column(nullable = false)
+	private Integer stockQuantity;
+
 	@Enumerated(EnumType.STRING)
 	private StockStatus stockStatus;
+
 
 	@Column(columnDefinition = "TEXT")
 	private String ingredients;
@@ -102,6 +106,19 @@ public class Product {
 	public void validateStock(){
 		if (this.stockStatus == StockStatus.OUT_OF_STOCK){
 			throw new IllegalStateException(this.name + " is out of stock");
+		}
+	}
+	public void decreaseStock(Integer requestedQuantity){
+		validateStock();
+		if (this.stockQuantity < requestedQuantity){
+			throw new IllegalStateException("Theres is not enought stock left.\n" +
+					"Requested : " + requestedQuantity +
+					"\n Available : " + stockQuantity);
+		}
+		this.stockQuantity -= requestedQuantity;
+		if (this.stockQuantity <= 0){
+			this.stockQuantity = 0;
+			this.stockStatus = StockStatus.OUT_OF_STOCK;
 		}
 	}
 }

@@ -24,6 +24,7 @@ public record ProductRequest(
 		Integer discountLevel2,
 		@PositiveOrZero(message = "Discount can't be negative")
 		Integer discountLevel3,
+		Integer stockQuantity,
 		String stockStatus,
 		Map<String, Object>additionalAttributes
 ) {

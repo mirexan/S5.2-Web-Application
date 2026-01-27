@@ -6,7 +6,7 @@ import com.boticarium.backend.application.dto.user.RegisterRequest;
 import com.boticarium.backend.domain.model.Role;
 import com.boticarium.backend.domain.model.User;
 import com.boticarium.backend.infrastructure.config.JwtService;
-import com.boticarium.backend.infrastructure.outbound.persistance.UserRepository;
+import com.boticarium.backend.infrastructure.outbound.persistence.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

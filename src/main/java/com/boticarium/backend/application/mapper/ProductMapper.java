@@ -40,6 +40,7 @@ public class ProductMapper {
 				product.getDiscountLevel1(),
 				product.getDiscountLevel2(),
 				product.getDiscountLevel3(),
+				product.getStockQuantity(),
 				product.getStockStatus().name(),
 				product.getCreatedAt(),
 				product.getUpdatedAt(),
@@ -58,6 +59,7 @@ public class ProductMapper {
 				.discountLevel1(request.discountLevel1() != null ? request.discountLevel1():0)
 				.discountLevel2(request.discountLevel2() != null ? request.discountLevel2():0)
 				.discountLevel3(request.discountLevel3()!= null ? request.discountLevel3():0)
+				.stockQuantity(request.stockQuantity() != null ? request.stockQuantity() : 0)
 				.stockStatus(StockStatus.AVAILABLE)
 				.additionalAttributes(request.additionalAttributes())
 				.build();
@@ -71,17 +73,13 @@ public class ProductMapper {
 		updateIfNotNull(request.discountLevel1(),existing::setDiscountLevel1);
 		updateIfNotNull(request.discountLevel2(),existing::setDiscountLevel2);
 		updateIfNotNull(request.discountLevel3(),existing::setDiscountLevel3);
+		updateIfNotNull(request.stockQuantity(), existing::setStockQuantity);
 		updateIfNotNull(request.ingredients(),existing::setIngredients);
 		updateIfNotNull(request.usageInstructions(),existing::setUsageInstructions);
 		updateIfNotNull(request.additionalAttributes(),existing::setAdditionalAttributes);
 
 		if (request.stockStatus() != null){
-			try{
-				existing.setStockStatus(StockStatus.valueOf(request.stockStatus()));
-			}
-			catch (IllegalArgumentException e){
-				System.out.println("Stock status only can be AVAILABLE and OUT_OF_STOCK");
-			}
+			existing.setStockStatus(StockStatus.valueOf(request.stockStatus()));
 		}
 	}
 	private <T> void updateIfNotNull(T value, Consumer<T> setter){
