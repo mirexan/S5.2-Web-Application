@@ -38,4 +38,9 @@ public class OrderItem {
 		}
 		return priceAtPurchase.multiply(BigDecimal.valueOf(quantity));
 	}
+	public void restoreStock() {
+		if (this.product != null) {
+			this.product.increaseStock(this.quantity);
+		}
+	}
 }

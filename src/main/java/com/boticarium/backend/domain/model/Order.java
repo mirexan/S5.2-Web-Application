@@ -60,4 +60,22 @@ public class Order {
 				.map(OrderItem::getSubTotal)
 				.reduce(BigDecimal.ZERO,BigDecimal::add);
 	}
+	public void markAsCompleted(){
+		if (this.status == OrderStatus.COMPLETED){
+			return;
+		}
+		this.status = OrderStatus.COMPLETED;
+		if(this.user != null){
+			this.user.addPoints(this.totalPrice.intValue());
+		}
+	}
+	public void cancel(){
+		if(this.status == OrderStatus.CANCELED){
+			return;
+		}
+		this.status = OrderStatus.CANCELED;
+		if(this.items != null){
+			this.items.forEach(OrderItem::restoreStock);
+		}
+	}
 }

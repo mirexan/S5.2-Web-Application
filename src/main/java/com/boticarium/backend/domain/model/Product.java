@@ -128,4 +128,9 @@ public class Product {
 		this.stockQuantity -= requestedQuantity;
 		normalizeStockStatus();
 	}
+	public void increaseStock(Integer returnedStock){
+		if (returnedStock == null || returnedStock <= 0) return;
+		this.stockQuantity += returnedStock;
+		normalizeStockStatus();
+	}
 }

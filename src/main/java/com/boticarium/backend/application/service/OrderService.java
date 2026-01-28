@@ -11,8 +11,10 @@ import com.boticarium.backend.infrastructure.outbound.persistence.UserRepository
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,10 +28,10 @@ public class OrderService {
 
 	@Transactional
 	public OrderResponse createOrder(Long userId,OrderRequest request) {
-		User user = findUserOrThrow(userId);
+		User user = findIdOrThrow(userRepository,userId,"User");
 		Order order = initializeOrder(user);
 		request.items().forEach(itemRequest -> {
-			order.addItem(processOrderItem(itemRequest));
+			order.addItem(processOrderItem(itemRequest, user.getLevel()));
 		});
 		order.calculateTotalPrice();
 		return orderMapper.toOrderResponse(orderRepository.save(order));
@@ -46,33 +48,49 @@ public class OrderService {
 				.collect(Collectors.toList());
 	}
 
+	@Transactional
 	public OrderResponse updateOrderStatus(Long orderId, OrderStatus newStatus){
-		Order orderToUpdate = orderRepository.findById(orderId)
-				.orElseThrow(() -> new EntityNotFoundException("Order id : " + orderId
-						+ " not found"));
-		orderToUpdate.setStatus(newStatus);
+		Order orderToUpdate = findIdOrThrow(orderRepository,orderId,"Order");
+		if (orderToUpdate.getStatus() == newStatus){
+			return orderMapper.toOrderResponse(orderToUpdate);
+		}
+		switch(newStatus){
+			case COMPLETED -> {
+				orderToUpdate.markAsCompleted();
+				userRepository.save(orderToUpdate.getUser());
+			}
+			case CANCELED -> {
+				orderToUpdate.cancel();
+				orderToUpdate.getItems().forEach(item ->
+						productRepository.save(item.getProduct()));
+			}
+			default -> orderToUpdate.setStatus(newStatus);
+		}
 		return orderMapper.toOrderResponse(orderRepository.save(orderToUpdate));
 	}
 
-	private User findUserOrThrow(Long userId) {
-		return userRepository.findById(userId)
-				.orElseThrow(()-> new EntityNotFoundException("User not found"));
+
+	private <T> T findIdOrThrow(JpaRepository<T, Long> repository, Long id, String entityName) {
+		return repository.findById(id)
+				.orElseThrow(()-> new EntityNotFoundException(entityName
+						+ " not found with id : " + id));
 	}
 	private Order initializeOrder(User user){
 		return Order.builder()
 				.user(user)
 				.status(OrderStatus.PENDING)
+				.createdAt(LocalDateTime.now())
+				.updatedAt(LocalDateTime.now())
 				.build();
 	}
-	private OrderItem processOrderItem(OrderItemRequest itemRequest){
-		Product newProduct = productRepository.findById(itemRequest.productId())
-				.orElseThrow(()-> new EntityNotFoundException("Product not found"));
+	private OrderItem processOrderItem(OrderItemRequest itemRequest, int userLevel){
+		Product newProduct = findIdOrThrow(productRepository, itemRequest.productId(), "Product");
 		newProduct.decreaseStock(itemRequest.quantity());
 		productRepository.save(newProduct);
 		return OrderItem.builder()
 				.product(newProduct)
 				.quantity(itemRequest.quantity())
-				.priceAtPurchase(newProduct.getBasePrice())
+				.priceAtPurchase(newProduct.getPriceForLevel(userLevel))
 				.build();
 	}
 }
