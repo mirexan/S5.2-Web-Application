@@ -5,8 +5,10 @@ import com.boticarium.backend.application.service.UserService;
 import com.boticarium.backend.domain.model.Role;
 import com.boticarium.backend.domain.model.User;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,13 +22,22 @@ public class UserController {
 
 	@GetMapping
 	public ResponseEntity<List<UserResponse>> getAllUsers(@AuthenticationPrincipal User actualUser) {
-		if (actualUser == null) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-		}
 		if (actualUser.getRole() == Role.ADMIN) {
 			return ResponseEntity.ok(userService.getAllUsers());
 		}
-		return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		throw new AccessDeniedException("Access denied : you dont have permission " +
+				"to access this resource");
+	}
+
+	@GetMapping("/{id}")
+	public ResponseEntity<UserResponse> getUserById(
+			@PathVariable Long id, @AuthenticationPrincipal User currentUser
+	) {
+		if (currentUser.getRole() != Role.ADMIN && !currentUser.getId().equals(id)) {
+			throw new AccessDeniedException("Access denied : you dont have permission " +
+					"to access another user resource");
+		}
+		return ResponseEntity.ok(userService.getUserById(id));
 	}
 
 	@DeleteMapping("/me")

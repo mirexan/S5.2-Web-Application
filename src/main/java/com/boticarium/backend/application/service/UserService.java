@@ -5,13 +5,15 @@ import com.boticarium.backend.domain.model.Role;
 import com.boticarium.backend.domain.model.User;
 import com.boticarium.backend.infrastructure.outbound.persistence.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -20,32 +22,56 @@ public class UserService {
 	public List<UserResponse> getAllUsers() {
 		return userRepository.findAll()
 				.stream()
-				.map(user -> new UserResponse(
-						user.getId(),
-						user.getUsername(),
-						user.getEmail(),
-						user.getRole(),
-						user.getPoints()
-				))
-				.collect(Collectors.toList());
+				.map(this::mapToUserResponse)
+				.toList();
 	}
+
+	public UserResponse getUserById(Long id) {
+		User user = findUserOrThrow(id);
+		return mapToUserResponse(user);
+	}
+
+	@Transactional
 	public void deleteUser(Long userId, User actualUser) {
-		User targetUser = userRepository.findById(userId)
-				.orElseThrow(()-> new EntityNotFoundException("User not found"));
-		if (actualUser.getRole() == Role.USER
-				&& !actualUser.getId().equals(targetUser.getId())) {
+		User targetUser = findUserOrThrow(userId);
+		validateDeletionPermission(actualUser, targetUser);
+		if (targetUser.getRole() == Role.ADMIN) {
+			ensureNotLastAdmin();
+		}
+		log.warn("User {} ({}) eliminated user {} ({})",
+				actualUser.getUsername(), actualUser.getRole(),
+				userId, targetUser.getRole());
+		userRepository.delete(targetUser);
+	}
+
+	private void validateDeletionPermission(User requester, User target){
+		if (requester.getRole() == Role.USER && !requester.getId().equals(target.getId())) {
 			throw new AccessDeniedException("You are not allowed to delete another user");
 		}
-		if (targetUser.getRole() == Role.ADMIN) {
-			long totalAdmins = userRepository.countByRole(Role.ADMIN);
-			if (totalAdmins <= 1) {
-				throw new IllegalStateException("Operation denied: There is only one admin in database");
-			}
-		}
-		if (actualUser.getRole() == Role.ADMIN && targetUser.getRole() == Role.ADMIN
-				&& !actualUser.getId().equals(targetUser.getId())) {
+		if (requester.getRole() == Role.ADMIN && target.getRole() == Role.ADMIN
+				&& !requester.getId().equals(target.getId())) {
 			throw new AccessDeniedException("You are not allowed to delete another Admin");
 		}
-		userRepository.delete(targetUser);
+	}
+
+	private void ensureNotLastAdmin(){
+		long totalAdmins = userRepository.countByRole(Role.ADMIN);
+		if (totalAdmins <= 1) {
+			throw new IllegalStateException("Operation denied: There is only one admin in database");
+		}
+	}
+
+	private User findUserOrThrow(Long id) {
+		return userRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
+	}
+	private UserResponse mapToUserResponse(User user) {
+		return new UserResponse(
+				user.getId(),
+				user.getUsername(),
+				user.getEmail(),
+				user.getRole(),
+				user.getPoints()
+		);
 	}
 }

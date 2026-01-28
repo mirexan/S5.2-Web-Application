@@ -51,8 +51,8 @@ public class ProductService {
 	public ProductAdminResponse updateProduct(Long id, ProductRequest request) {
 		Product actualProduct = findProductOrThrow(id);
 		mapper.updateProductFromRequest(actualProduct, request);
-		Product updatedProduct = repository.save(actualProduct);
-		return mapper.toAdminResponse(updatedProduct);
+		actualProduct.normalizeStockStatus();
+		return mapper.toAdminResponse(repository.save(actualProduct));
 	}
 
 	public void deleteProduct(Long id) {

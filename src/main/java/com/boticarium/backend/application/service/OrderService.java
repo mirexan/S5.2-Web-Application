@@ -11,13 +11,15 @@ import com.boticarium.backend.infrastructure.outbound.persistence.UserRepository
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderService {
@@ -58,11 +60,13 @@ public class OrderService {
 			case COMPLETED -> {
 				orderToUpdate.markAsCompleted();
 				userRepository.save(orderToUpdate.getUser());
+				log.info("Order has been updated successfully");
 			}
 			case CANCELED -> {
 				orderToUpdate.cancel();
 				orderToUpdate.getItems().forEach(item ->
 						productRepository.save(item.getProduct()));
+				log.info("Order has been cancelled successfully");
 			}
 			default -> orderToUpdate.setStatus(newStatus);
 		}
@@ -87,10 +91,19 @@ public class OrderService {
 		Product newProduct = findIdOrThrow(productRepository, itemRequest.productId(), "Product");
 		newProduct.decreaseStock(itemRequest.quantity());
 		productRepository.save(newProduct);
+		logDiscount(newProduct,userLevel);
 		return OrderItem.builder()
 				.product(newProduct)
 				.quantity(itemRequest.quantity())
 				.priceAtPurchase(newProduct.getPriceForLevel(userLevel))
 				.build();
+	}
+	private void logDiscount(Product newProduct, int userLevel){
+		BigDecimal originalPrice =  newProduct.getBasePrice();
+		BigDecimal finalPrice = newProduct.getPriceForLevel(userLevel);
+		if (finalPrice.compareTo(originalPrice) < 0){
+			BigDecimal discount = originalPrice.subtract(finalPrice);
+			log.info("👌Discount applied: User level {} saved {}€", userLevel, discount);
+		}
 	}
 }

@@ -36,7 +36,7 @@ public class DataSeeder implements CommandLineRunner {
 					.email("admin@boticarium.com")
 					.password(passwordEncoder.encode("klonoa"))
 					.role(Role.ADMIN)
-					.points(0)
+					.points(1000)
 					.build();
 			userRepository.save(admin);
 		}
@@ -69,6 +69,9 @@ public class DataSeeder implements CommandLineRunner {
 				.description("Se va a acabar pronto")
 				.basePrice(new BigDecimal("20.00"))
 				.costPrice(new BigDecimal("5.00"))
+				.discountLevel1(0)
+				.discountLevel2(5)
+				.discountLevel3(10)
 				.stockQuantity(2)
 				.stockStatus(StockStatus.AVAILABLE)
 				.imgUrl("http://img.com/serum.jpg")

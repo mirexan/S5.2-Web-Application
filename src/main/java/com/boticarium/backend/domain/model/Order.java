@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -12,7 +13,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
+@Slf4j
 @Entity
 @Table(name = "orders")
 @Data
@@ -66,7 +67,12 @@ public class Order {
 		}
 		this.status = OrderStatus.COMPLETED;
 		if(this.user != null){
+			int currentLevel = this.user.getLevel();
 			this.user.addPoints(this.totalPrice.intValue());
+			if(this.user.getLevel() > currentLevel){
+				log.info("🌿 Congratulations! You level up from " + currentLevel
+						+ " to " + this.user.getLevel());
+			}
 		}
 	}
 	public void cancel(){
