@@ -3,3 +3,7 @@
 compose.yaml text eol=lf
 .gitattributes text eol=lf
 pom.xml text eol=lf
+boticarium-front/.gitignore text eol=lf
+boticarium-front/package-lock.json text eol=lf
+boticarium-front/package.json text eol=lf
+*.js text eol=lf

@@ -9,7 +9,7 @@
 		<relativePath/>
 	</parent>
 	<groupId>com.boticarium</groupId>
-	<artifactId>backend</artifactId>
+	<artifactId>2-Web-Application</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>backend</name>
 	<description>backend for boticarium product platform</description>
