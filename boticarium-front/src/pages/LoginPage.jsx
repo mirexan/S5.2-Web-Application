@@ -14,13 +14,22 @@ function LoginPage() {
         setError('');
 
         try{
-            const data = await loginUser(username, password);
-            console.log('Succeed login: ', data);
+           const response = await axios.post('http://localhost:8080/auth/login', {
+                username,
+                password
+            });
+            const token = response.data.token;
+            localStorage.setItem('userToken', token);
+            
+            window.dispatchEvent(new Event("storage"));
+            alert("¡Bienvenido " + username + "!");
             navigate('/products');
+            window.location.reload();
         }
         catch (err){
-            setError('Wrong user or password');
-            }
+            console.error(error);
+            alert("Usuario o contraseña incorrectos");
+        }
     };
 
     return (

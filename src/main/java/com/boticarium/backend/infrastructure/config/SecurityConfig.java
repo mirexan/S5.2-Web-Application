@@ -1,9 +1,5 @@
 package com.boticarium.backend.infrastructure.config;
 
-import com.boticarium.backend.infrastructure.security.CustomAccessDeniedHandler;
-import com.boticarium.backend.infrastructure.security.CustomAuthenticationEntryPoint;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -16,15 +12,28 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.boticarium.backend.infrastructure.security.CustomAccessDeniedHandler;
+import com.boticarium.backend.infrastructure.security.CustomAuthenticationEntryPoint;
+
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
 
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
 	private final AuthenticationProvider authenticationProvider;
 	private final CustomAccessDeniedHandler accessDeniedHandler;
 	private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+
+	public SecurityConfig(
+			JwtAuthenticationFilter jwtAuthenticationFilter,
+			AuthenticationProvider authenticationProvider,
+			CustomAccessDeniedHandler accessDeniedHandler,
+			CustomAuthenticationEntryPoint authenticationEntryPoint) {
+		this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+		this.authenticationProvider = authenticationProvider;
+		this.accessDeniedHandler = accessDeniedHandler;
+		this.authenticationEntryPoint = authenticationEntryPoint;
+	}
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
