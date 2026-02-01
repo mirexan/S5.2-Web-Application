@@ -1,5 +1,6 @@
 package com.boticarium.backend.application.service;
 
+import com.boticarium.backend.domain.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -10,8 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Function;
 
 @Service
@@ -23,14 +22,16 @@ public class JwtService {
 		return extractClaim(token, Claims::getSubject);
 	}
 
-	public String generateToken(UserDetails userDetails) {
-		return generateToken(new HashMap<>(), userDetails);
-	}
-
-	public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+	/**
+	 * Genera token JWT incluyendo role y points del usuario
+	 * @param user Usuario con rol y puntos
+	 * @return Token JWT con claims de role y points
+	 */
+	public String generateToken(User user) {
 		return Jwts.builder()
-				.setClaims(extraClaims)
-				.setSubject(userDetails.getUsername())
+				.setSubject(user.getUsername())
+				.claim("role", user.getRole().toString())
+				.claim("points", user.getPoints())
 				.setIssuedAt(new Date(System.currentTimeMillis()))
 				.setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
 				.signWith(getSignInKey(), SignatureAlgorithm.HS256)

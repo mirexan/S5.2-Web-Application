@@ -1,6 +1,7 @@
 package com.boticarium.backend.infrastructure.inbound.controller;
 
 import com.boticarium.backend.application.dto.auth.AuthResponse;
+import com.boticarium.backend.application.dto.auth.GoogleLoginRequest;
 import com.boticarium.backend.application.dto.auth.LoginRequest;
 import com.boticarium.backend.application.dto.user.RegisterRequest;
 import com.boticarium.backend.application.service.AuthenticationService;
@@ -27,5 +28,10 @@ public class AuthenticationController {
 	@PostMapping("/login")
 	public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
 		return ResponseEntity.ok(authService.login(request));
+	}
+
+	@PostMapping("/google")
+	public ResponseEntity<AuthResponse> loginWithGoogle(@RequestBody GoogleLoginRequest request) throws Exception {
+		return ResponseEntity.ok(authService.loginWithGoogle(request));
 	}
 }

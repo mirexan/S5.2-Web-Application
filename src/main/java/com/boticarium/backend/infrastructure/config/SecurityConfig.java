@@ -52,8 +52,11 @@ public class SecurityConfig {
 
 	private void configureRoutes(AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry auth) {
 		auth
+				.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 				.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/auth/**").permitAll()
 				.requestMatchers("/error").permitAll()
+				.requestMatchers(HttpMethod.POST, "/uploads/**").permitAll()
+				.requestMatchers("/uploads/**").permitAll()
 
 				.requestMatchers("/products/management/**").hasAuthority("ROLE_ADMIN")
 				.requestMatchers(HttpMethod.POST, "/products/**").hasAuthority("ROLE_ADMIN")

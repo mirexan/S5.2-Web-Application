@@ -1,11 +1,15 @@
 import { useNavigate } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
+import { getUsername, isAdmin } from '../utils/jwtUtils';
 
 function Navbar() {
     const navigate = useNavigate();
+    const { getCartItemsCount } = useCart();
     const isLoggedIn = localStorage.getItem('token');
+    const username = getUsername();
+    const adminRole = isAdmin();
 
     const handleLogout = () => {
-        // Para salir, borramos el token y recargamos la página
         localStorage.removeItem('token');
         navigate('/login');
     };
@@ -33,7 +37,57 @@ function Navbar() {
                 {isLoggedIn ? (
                     // SI ESTÁ LOGUEADO: Muestra botón de Salir y Carrito
                     <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-                        <span>👤 Hola, Usuario</span>
+                        <button
+                            onClick={() => navigate('/cart')}
+                            style={{ 
+                                background: '#28a745', 
+                                color: 'white', 
+                                border: 'none', 
+                                padding: '8px 15px', 
+                                cursor: 'pointer', 
+                                borderRadius: '4px',
+                                position: 'relative',
+                                fontWeight: 'bold'
+                            }}
+                        >
+                            🛒 Carrito
+                            {getCartItemsCount() > 0 && (
+                                <span style={{
+                                    position: 'absolute',
+                                    top: '-8px',
+                                    right: '-8px',
+                                    background: 'red',
+                                    color: 'white',
+                                    borderRadius: '50%',
+                                    width: '22px',
+                                    height: '22px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '12px',
+                                    fontWeight: 'bold'
+                                }}>
+                                    {getCartItemsCount()}
+                                </span>
+                            )}
+                        </button>
+                        {adminRole && (
+                            <button
+                                onClick={() => navigate('/admin')}
+                                style={{ 
+                                    background: '#ff6b00', 
+                                    color: 'white', 
+                                    border: 'none', 
+                                    padding: '8px 15px', 
+                                    cursor: 'pointer', 
+                                    borderRadius: '4px',
+                                    fontWeight: 'bold'
+                                }}
+                            >
+                                ⚙️ Panel Admin
+                            </button>
+                        )}
+                        <span>👤 Hola, {username}  {adminRole && <span style={{ background: '#ff6b00', padding: '2px 8px', borderRadius: '3px', marginLeft: '5px' }}>👑 ADMIN</span>}</span>
                         <button 
                             onClick={handleLogout}
                             style={{ background: 'red', color: 'white', border: 'none', padding: '5px 10px', cursor: 'pointer', borderRadius: '4px' }}

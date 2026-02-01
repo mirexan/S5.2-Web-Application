@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
 import { getAllProducts } from '../services/productService';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
 
 function ProductList() {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
+    const location = useLocation();
+    const { addToCart } = useCart();
 
 
     useEffect(() => {
@@ -24,9 +27,15 @@ function ProductList() {
             }
         };
         fetchProducts();
-    }, []);
+    }, [location]);
 
     const handleAddToCart = (product) => {
+        // Validar stock
+        if (!product.stockQuantity || product.stockQuantity <= 0) {
+            alert(`❌ Lo sentimos, "${product.name}" está agotado.`);
+            return;
+        }
+
         const token = localStorage.getItem('token');
         if (!token) {
            const irAlLogin = window.confirm("🔒 Para comprar necesitas identificarte.\n¿Quieres ir a la pantalla de login ahora?");
@@ -35,7 +44,9 @@ function ProductList() {
             }
             return;
         }
-        alert(`Added ${product.name} to cart!🛒`);
+        
+        addToCart(product);
+        alert(`✅ ${product.name} añadido al carrito! (Stock disponible: ${product.stockQuantity - 1})`);
     };
     if (loading) return <div style={{padding: '20px'}}>Loading products... ⏳</div>;
     if (error) return <div style={{padding: '20px', color: 'red'}}>❌ {error}</div>;
@@ -54,12 +65,15 @@ function ProductList() {
                         display: 'flex',
                         flexDirection: 'column'
                     }}>
-                        {/* IMAGEN INTELIGENTE */}
+                        {/* IMAGEN desde BD (imgUrl) o fallback */}
                         <img 
-    
-                            src={`https://picsum.photos/seed/${product.id}/200/200`} 
+                            src={product.imgUrl || `https://picsum.photos/seed/${product.id}/200/200`} 
                             alt={product.name}
                             style={{ width: '100%', height: '180px', objectFit: 'cover' }}
+                            onError={(e) => {
+                                // Si la imagen falla, usar placeholder
+                                e.target.src = `https://picsum.photos/seed/${product.id}/200/200`;
+                            }}
                         />
                         
                         <div style={{ padding: '15px', flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
@@ -76,18 +90,19 @@ function ProductList() {
 
                                 <button 
                                     onClick={() => handleAddToCart(product)}
+                                    disabled={!product.stockQuantity || product.stockQuantity <= 0}
                                     style={{ 
                                         width: '100%', 
                                         padding: '10px', 
-                                        background: '#28a745', 
+                                        background: (!product.stockQuantity || product.stockQuantity <= 0) ? '#ccc' : '#28a745', 
                                         color: 'white', 
                                         border: 'none', 
                                         borderRadius: '5px',
-                                        cursor: 'pointer',
+                                        cursor: (!product.stockQuantity || product.stockQuantity <= 0) ? 'not-allowed' : 'pointer',
                                         fontWeight: 'bold'
                                     }}
                                 >
-                                    Añadir al Carrito 🛒
+                                    {(!product.stockQuantity || product.stockQuantity <= 0) ? '❌ Agotado' : 'Añadir al Carrito 🛒'}
                                 </button>
                             </div>
                         </div>

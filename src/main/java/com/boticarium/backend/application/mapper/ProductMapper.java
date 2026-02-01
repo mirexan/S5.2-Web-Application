@@ -21,7 +21,11 @@ public class ProductMapper {
 				product.getIngredients(),
 				product.getUsageInstructions(),
 				product.getBasePrice(),
+				product.getStockQuantity(),
 				product.getStockStatus().name(),
+				product.getDiscountLevel1(),
+				product.getDiscountLevel2(),
+				product.getDiscountLevel3(),
 				product.getAdditionalAttributes()
 		);
 	}

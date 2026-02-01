@@ -9,7 +9,7 @@ export const loginUser = async (username, password) =>{
         password: password
         });
         if (response.data.token){
-            localStorage.setItem('userToken', response.data.token);
+            localStorage.setItem('token', response.data.token);
         }
         return response.data;
      }
@@ -19,6 +19,40 @@ export const loginUser = async (username, password) =>{
     }
 };
 
+export const registerUser = async (username, email, password) =>{
+    try{
+        const response = await axios.post(`${API_URL}/register`,{
+        username: username,
+        email: email,
+        password: password
+        });
+        if (response.data.token){
+            localStorage.setItem('token', response.data.token);
+        }
+        return response.data;
+     }
+    catch (error){
+    console.error("Register error: ", error);
+    throw error;
+    }
+};
+
+export const loginWithGoogle = async (token) =>{
+    try{
+        const response = await axios.post(`${API_URL}/google`,{
+        token: token
+        });
+        if (response.data.token){
+            localStorage.setItem('token', response.data.token);
+        }
+        return response.data;
+     }
+    catch (error){
+    console.error("Google login error: ", error);
+    throw error;
+    }
+};
+
 export const logoutUser = () => {
-    localStorage.removeItem('userToken');
+    localStorage.removeItem('token');
 };

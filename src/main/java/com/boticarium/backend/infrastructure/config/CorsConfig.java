@@ -17,12 +17,11 @@ public class CorsConfig {
 		CorsConfiguration config = new CorsConfiguration();
 
 		config.setAllowCredentials(true);
-
-		config.addAllowedOrigin("http://localhost:5173");
-
+		config.addAllowedOriginPattern("http://localhost:5173");
+		config.addAllowedOriginPattern("http://localhost:*");
 		config.addAllowedHeader("*");
-
 		config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+		config.setMaxAge(3600L);
 
 		source.registerCorsConfiguration("/**", config);
 		return new CorsFilter(source);

@@ -58,9 +58,10 @@ public class DataSeeder implements CommandLineRunner {
 				.description("Te perfuma a alcanfor y te quita todo lo malo")
 				.basePrice(new BigDecimal("50.00"))
 				.costPrice(new BigDecimal("10.00"))
-				.stockQuantity(100) // <--- STOCK INICIAL
-				.stockStatus(StockStatus.AVAILABLE) // <--- ESTADO INICIAL
-				.imgUrl("http://img.com/crema.jpg")
+				.stockQuantity(100)
+				.stockStatus(StockStatus.AVAILABLE)
+				.imgUrl("/images/divasel.jpg")
+				// .imgUrl("https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=400")
 				.build();
 
 
@@ -74,7 +75,8 @@ public class DataSeeder implements CommandLineRunner {
 				.discountLevel3(10)
 				.stockQuantity(2)
 				.stockStatus(StockStatus.AVAILABLE)
-				.imgUrl("http://img.com/serum.jpg")
+				.imgUrl("/images/baba-chufi.jpg")
+				// .imgUrl("https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400")
 				.build();
 
 		productRepository.saveAll(List.of(p1, p2));
