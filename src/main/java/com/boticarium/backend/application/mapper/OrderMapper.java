@@ -17,7 +17,12 @@ public class OrderMapper {
 				order.getCreatedAt(),
 				order.getStatus(),
 				order.getTotalPrice(),
-				toItemResponseList(order.getItems())
+				toItemResponseList(order.getItems()),
+				new OrderResponse.UserOrderInfo(
+						order.getUser().getId(),
+						order.getUser().getUsername(),
+						order.getUser().getPhone()
+				)
 		);
 	}
 	private List<OrderItemResponse> toItemResponseList(List<OrderItem> items) {

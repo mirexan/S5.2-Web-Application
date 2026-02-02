@@ -30,6 +30,7 @@ public class AuthenticationService {
 				.username(request.username())
 				.password(passwordEncoder.encode(request.password()))
 				.email(request.email())
+				.phone(request.phone())
 				.role(Role.USER)
 				.points(0)
 				.build();
@@ -43,6 +44,7 @@ public class AuthenticationService {
 				.username(request.username())
 				.password(passwordEncoder.encode(request.password()))
 				.email(request.email())
+				.phone(request.phone())
 				.role(Role.ADMIN)
 				.points(1000)
 				.build();

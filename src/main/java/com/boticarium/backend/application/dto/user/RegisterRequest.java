@@ -8,6 +8,8 @@ public record RegisterRequest(
 		@NotBlank(message = "Email is mandatory")
 		@Email(message = "Non valid email format")
 		String email,
+		@NotBlank(message = "Phone is mandatory")
+		String phone,
 		@NotBlank(message = "password is mandatory")
 		@Size(min = 6, message = "It must contain at least 6 characters")
 		String password

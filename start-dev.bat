@@ -35,8 +35,13 @@ timeout /t 3 >nul
 :: --- PASO 2: BACKEND (Java) ---
 echo.
 echo [2/3] Arrancando Backend (Puerto 8080)...
-:: Truco: Inyectamos la variable directamente en la nueva ventana para asegurar que Java la vea
-start "LOGS BACKEND (Spring Boot)" /d "%~dp0" cmd /k "set GOOGLE_CLIENT_ID=%GOOGLE_CLIENT_ID% && echo ID Inyectado: %GOOGLE_CLIENT_ID% && mvnw spring-boot:run"
+:: Creamos un archivo temporal para ejecutar el backend con la variable de entorno
+echo @echo off > "%TEMP%\boticarium-backend-start.bat"
+echo set GOOGLE_CLIENT_ID=%GOOGLE_CLIENT_ID% >> "%TEMP%\boticarium-backend-start.bat"
+echo cd /d "%~dp0" >> "%TEMP%\boticarium-backend-start.bat"
+echo echo [BACKEND] Google Client ID: %%GOOGLE_CLIENT_ID%% >> "%TEMP%\boticarium-backend-start.bat"
+echo mvnw spring-boot:run -DskipTests >> "%TEMP%\boticarium-backend-start.bat"
+start "LOGS BACKEND (Spring Boot)" cmd /k "%TEMP%\boticarium-backend-start.bat"
 
 
 :: --- PASO 3: FRONTEND (React) ---

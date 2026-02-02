@@ -1,0 +1,22 @@
+@import url('https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:wght@300;400;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Averia Serif Libre', serif;
+  background: linear-gradient(135deg, #f5ede3 0%, #ebe0d5 25%, #f0e6db 50%, #e8ddd0 75%, #f2e8dd 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+button, input, select, textarea {
+  font-family: 'Averia Serif Libre', serif;
+}

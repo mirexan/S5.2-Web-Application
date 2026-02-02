@@ -12,6 +12,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.boticarium.backend.infrastructure.config.JwtAuthenticationFilter;
 import com.boticarium.backend.infrastructure.security.CustomAccessDeniedHandler;
 import com.boticarium.backend.infrastructure.security.CustomAuthenticationEntryPoint;
 
@@ -57,6 +58,7 @@ public class SecurityConfig {
 				.requestMatchers("/error").permitAll()
 				.requestMatchers(HttpMethod.POST, "/uploads/**").permitAll()
 				.requestMatchers("/uploads/**").permitAll()
+				.requestMatchers("/images/**").permitAll()
 
 				.requestMatchers("/products/management/**").hasAuthority("ROLE_ADMIN")
 				.requestMatchers(HttpMethod.POST, "/products/**").hasAuthority("ROLE_ADMIN")

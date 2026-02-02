@@ -34,69 +34,94 @@ function RegisterPage() {
     };
 
     return (
-        <div style={{ padding: '20px', maxWidth: '400px', margin: '0 auto' }}>
-            <h2>Crear cuenta en Boticarium</h2>
+        <div style={{
+            background: 'linear-gradient(180deg, #f7f3eb 0%, #efe7d8 100%)',
+            minHeight: '100vh',
+            padding: '40px 20px'
+        }}>
+            <div style={{
+                maxWidth: '420px',
+                margin: '0 auto',
+                background: 'white',
+                borderRadius: '16px',
+                padding: '28px',
+                boxShadow: '0 8px 20px rgba(0,0,0,0.08)'
+            }}>
+                <h2 style={{ color: '#3f4f36', marginTop: 0 }}>Crear cuenta en Boticarium</h2>
 
-            <form onSubmit={handleSubmit}>
-                <div style={{ marginBottom: '10px' }}>
-                    <label>Usuario:</label>
-                    <input
-                        type="text"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        style={{ width: '100%', padding: '8px' }}
-                        required
-                    />
-                </div>
+                <form onSubmit={handleSubmit}>
+                    <div style={{ marginBottom: '12px' }}>
+                        <label style={{ color: '#5a4a3c', fontWeight: '600' }}>Usuario:</label>
+                        <input
+                            type="text"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e1d3bf' }}
+                            required
+                        />
+                    </div>
 
-                <div style={{ marginBottom: '10px' }}>
-                    <label>Email:</label>
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        style={{ width: '100%', padding: '8px' }}
-                        required
-                    />
-                </div>
+                    <div style={{ marginBottom: '12px' }}>
+                        <label style={{ color: '#5a4a3c', fontWeight: '600' }}>Email:</label>
+                        <input
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e1d3bf' }}
+                            required
+                        />
+                    </div>
 
-                <div style={{ marginBottom: '10px' }}>
-                    <label>Contraseña:</label>
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        style={{ width: '100%', padding: '8px' }}
-                        required
-                    />
-                </div>
+                    <div style={{ marginBottom: '12px' }}>
+                        <label style={{ color: '#5a4a3c', fontWeight: '600' }}>Contraseña:</label>
+                        <input
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e1d3bf' }}
+                            required
+                        />
+                    </div>
 
-                {error && <p style={{ color: 'red' }}>{error}</p>}
+                    {error && <p style={{ color: '#8a5a44', fontWeight: '600' }}>{error}</p>}
 
-                <button
-                    type="submit"
-                    disabled={loading}
-                    style={{
-                        padding: '10px 20px',
-                        cursor: loading ? 'not-allowed' : 'pointer',
-                        opacity: loading ? 0.6 : 1
-                    }}
-                >
-                    {loading ? 'Creando cuenta...' : 'Crear cuenta'}
-                </button>
+                    <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            style={{
+                                padding: '11px 20px',
+                                cursor: loading ? 'not-allowed' : 'pointer',
+                                opacity: loading ? 0.6 : 1,
+                                border: 'none',
+                                borderRadius: '10px',
+                                background: 'linear-gradient(135deg, #7a9b76 0%, #6b8f71 100%)',
+                                color: 'white',
+                                fontWeight: '700',
+                                flex: 1
+                            }}
+                        >
+                            {loading ? 'Creando cuenta...' : 'Crear cuenta'}
+                        </button>
 
-                <button
-                    type="button"
-                    onClick={() => navigate('/login')}
-                    style={{
-                        marginLeft: '10px',
-                        padding: '10px 20px',
-                        cursor: 'pointer'
-                    }}
-                >
-                    Volver
-                </button>
-            </form>
+                        <button
+                            type="button"
+                            onClick={() => navigate('/login')}
+                            style={{
+                                padding: '11px 20px',
+                                cursor: 'pointer',
+                                border: '1px solid #d8c7ae',
+                                borderRadius: '10px',
+                                background: '#f5f2ea',
+                                color: '#5a4a3c',
+                                fontWeight: '700'
+                            }}
+                        >
+                            Volver
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     );
 }

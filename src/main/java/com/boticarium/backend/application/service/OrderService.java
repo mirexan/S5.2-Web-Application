@@ -12,6 +12,8 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 
@@ -48,6 +50,11 @@ public class OrderService {
 		return orderRepository.findAll().stream()
 				.map(orderMapper::toOrderResponse)
 				.collect(Collectors.toList());
+	}
+
+	public Page<OrderResponse> getAllOrdersPaginated(Pageable pageable) {
+		return orderRepository.findAll(pageable)
+				.map(orderMapper::toOrderResponse);
 	}
 
 	@Transactional

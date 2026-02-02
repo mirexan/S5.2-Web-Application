@@ -82,6 +82,18 @@ export const isAdmin = () => {
 };
 
 /**
+ * Obtiene el nivel del usuario del token
+ * @returns {number|null} - Nivel (0, 1, 2, 3) o null
+ */
+export const getLevel = () => {
+  const token = localStorage.getItem('token');
+  if (!token) return 0;
+
+  const payload = decodeJWT(token);
+  return payload?.level || 0;
+};
+
+/**
  * Verifica si el token ha expirado
  * @returns {boolean} - true si ha expirado, false si aún es válido
  */

@@ -30,11 +30,21 @@ public class User implements UserDetails {
 	@Column(unique = true, nullable = false)
 	private String email;
 
+	@Column(nullable = false)
+	private String phone;
+
 	@Enumerated(EnumType.STRING)
 	private Role role;
 
 	@Builder.Default
 	private Integer points = 0;
+	
+	/**
+	 * Calcula el nivel del usuario basado en sus puntos:
+	 * - Nivel 1: 0-199 puntos
+	 * - Nivel 2: 200-499 puntos
+	 * - Nivel 3: 500+ puntos
+	 */
 	public int getLevel(){
 		if(this.points >= 500){
 			return 3;
@@ -44,6 +54,7 @@ public class User implements UserDetails {
 		}
 		return 1;
 	}
+	
 	public void addPoints(int amount){
 		if (amount > 0){
 			this.points += amount;

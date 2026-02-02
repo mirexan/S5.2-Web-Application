@@ -7,6 +7,10 @@ import com.boticarium.backend.application.service.OrderService;
 import com.boticarium.backend.domain.model.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -33,8 +37,16 @@ public class OrderController {
 	}
 
 	@GetMapping("/management")
-	public ResponseEntity<List<OrderResponse>> getAllOrdersHistoryAdmin(){
-		return ResponseEntity.ok(orderService.getAllOrders());
+	public ResponseEntity<Page<OrderResponse>> getAllOrdersHistoryAdmin(
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "15") int size,
+			@RequestParam(defaultValue = "createdAt,desc") String sort) {
+		String[] sortParams = sort.split(",");
+		Sort.Direction direction = sortParams.length > 1 && sortParams[1].equalsIgnoreCase("asc") 
+			? Sort.Direction.ASC 
+			: Sort.Direction.DESC;
+		Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParams[0]));
+		return ResponseEntity.ok(orderService.getAllOrdersPaginated(pageable));
 	}
 
 	@PatchMapping("/management/{id}/status")

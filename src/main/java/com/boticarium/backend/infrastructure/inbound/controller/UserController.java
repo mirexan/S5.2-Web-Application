@@ -1,9 +1,11 @@
 package com.boticarium.backend.infrastructure.inbound.controller;
 
 import com.boticarium.backend.application.dto.user.UserResponse;
+import com.boticarium.backend.application.dto.user.UpdateProfileRequest;
 import com.boticarium.backend.application.service.UserService;
 import com.boticarium.backend.domain.model.Role;
 import com.boticarium.backend.domain.model.User;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -38,6 +40,24 @@ public class UserController {
 					"to access another user resource");
 		}
 		return ResponseEntity.ok(userService.getUserById(id));
+	}
+
+	@GetMapping("/profile")
+	public ResponseEntity<UserResponse> getProfile(@AuthenticationPrincipal User currentUser) {
+		return ResponseEntity.ok(userService.getUserProfile(currentUser));
+	}
+
+	@PutMapping("/profile")
+	public ResponseEntity<UserResponse> updateProfile(
+			@AuthenticationPrincipal User currentUser,
+			@Valid @RequestBody UpdateProfileRequest request) {
+		return ResponseEntity.ok(userService.updateProfile(currentUser, request));
+	}
+
+	@DeleteMapping("/profile")
+	public ResponseEntity<Void> deleteProfile(@AuthenticationPrincipal User currentUser) {
+		userService.deleteProfile(currentUser);
+		return ResponseEntity.noContent().build();
 	}
 
 	@DeleteMapping("/me")

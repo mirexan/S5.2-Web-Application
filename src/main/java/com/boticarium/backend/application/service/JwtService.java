@@ -23,15 +23,16 @@ public class JwtService {
 	}
 
 	/**
-	 * Genera token JWT incluyendo role y points del usuario
-	 * @param user Usuario con rol y puntos
-	 * @return Token JWT con claims de role y points
+	 * Genera token JWT incluyendo role, points y level del usuario
+	 * @param user Usuario con rol, puntos y nivel
+	 * @return Token JWT con claims de role, points y level
 	 */
 	public String generateToken(User user) {
 		return Jwts.builder()
 				.setSubject(user.getUsername())
 				.claim("role", user.getRole().toString())
 				.claim("points", user.getPoints())
+				.claim("level", user.getLevel())
 				.setIssuedAt(new Date(System.currentTimeMillis()))
 				.setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
 				.signWith(getSignInKey(), SignatureAlgorithm.HS256)

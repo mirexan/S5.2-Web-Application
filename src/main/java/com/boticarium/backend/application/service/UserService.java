@@ -1,6 +1,7 @@
 package com.boticarium.backend.application.service;
 
 import com.boticarium.backend.application.dto.user.UserResponse;
+import com.boticarium.backend.application.dto.user.UpdateProfileRequest;
 import com.boticarium.backend.domain.model.Role;
 import com.boticarium.backend.domain.model.User;
 import com.boticarium.backend.infrastructure.outbound.persistence.UserRepository;
@@ -9,6 +10,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -44,6 +47,27 @@ public class UserService {
 		userRepository.delete(targetUser);
 	}
 
+	public UserResponse getUserProfile(User user) {
+		return mapToUserResponse(user);
+	}
+
+	@Transactional
+	public UserResponse updateProfile(User user, UpdateProfileRequest request) {
+		user.setEmail(request.email());
+		user.setPhone(request.phone());
+		userRepository.save(user);
+		return mapToUserResponse(user);
+	}
+
+	@Transactional
+	public void deleteProfile(User user) {
+		if (user.getRole() == Role.ADMIN) {
+			ensureNotLastAdmin();
+		}
+		log.warn("User {} ({}) deleted their own account", user.getUsername(), user.getRole());
+		userRepository.delete(user);
+	}
+
 	private void validateDeletionPermission(User requester, User target){
 		if (requester.getRole() == Role.USER && !requester.getId().equals(target.getId())) {
 			throw new AccessDeniedException("You are not allowed to delete another user");
@@ -70,6 +94,7 @@ public class UserService {
 				user.getId(),
 				user.getUsername(),
 				user.getEmail(),
+				user.getPhone(),
 				user.getRole(),
 				user.getPoints()
 		);
