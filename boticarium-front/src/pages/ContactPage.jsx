@@ -42,7 +42,7 @@ function ContactPage() {
     }}>
       <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
         <h1 style={{ color: '#3f4f36', textAlign: 'center', marginBottom: '30px', fontWeight: '300', letterSpacing: '1px' }}>
-          📍 Contacto
+           Contacto
         </h1>
 
         <div style={{ display: 'grid', gap: '20px', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))' }}>

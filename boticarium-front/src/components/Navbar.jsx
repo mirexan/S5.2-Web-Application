@@ -27,7 +27,7 @@ function Navbar() {
             backgroundSize: '120% 100%, 100% 100%',
             boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
             color: '#3e2c1e',
-            marginBottom: '20px'
+            marginBottom: '0'
         }}>
             {/* LOGO O NOMBRE DE LA TIENDA */}
             <div 

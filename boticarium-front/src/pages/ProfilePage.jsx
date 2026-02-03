@@ -392,6 +392,7 @@ function ProfilePage() {
                       <th style={{ padding: '10px', textAlign: 'left' }}>Total</th>
                       <th style={{ padding: '10px', textAlign: 'left' }}>Estado</th>
                       <th style={{ padding: '10px', textAlign: 'left' }}>Fecha</th>
+                      <th style={{ padding: '10px', textAlign: 'left' }}>WhatsApp</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -412,6 +413,29 @@ function ProfilePage() {
                           </span>
                         </td>
                         <td style={{ padding: '10px' }}>{new Date(order.createdAt).toLocaleDateString('es-ES')}</td>
+                        <td style={{ padding: '10px' }}>
+                          <button
+                            onClick={() => {
+                              const message = `Hola, soy ${userData.username}. Mi teléfono es ${userData.phone || 'no registrado'}. Consulta sobre pedido #${order.id}`;
+                              window.open(`https://wa.me/34664152330?text=${encodeURIComponent(message)}`, '_blank');
+                            }}
+                            style={{
+                              padding: '6px 12px',
+                              background: '#25D366',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              fontSize: '0.85em',
+                              fontWeight: 'bold',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px'
+                            }}
+                          >
+                            💬 WhatsApp
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
