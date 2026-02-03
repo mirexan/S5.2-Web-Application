@@ -122,7 +122,13 @@ function ProductList() {
     
     return (
         <>
-            <div style={{ padding: '40px 20px', background: 'linear-gradient(180deg, #f7f3eb 0%, #efe7d8 100%)', minHeight: '100vh' }}>
+            <style>
+                {`
+                    .fade-in { animation: fadeIn 1s ease-in; }
+                    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+                `}
+            </style>
+            <div className="fade-in" style={{ padding: '40px 20px', background: 'linear-gradient(180deg, #f7f3eb 0%, #efe7d8 100%)', minHeight: '100vh' }}>
                 <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
                     {/* Imagen de potes - Hero Section */}
                     <div style={{ 
@@ -136,16 +142,19 @@ function ProductList() {
                     }}>
                         {/* Imagen */}
                         <img 
-                            src={`${API_URL}/images/potes.png`}
+                            src={`${API_URL}/images/newPotes.jpg`}
                             alt="Potes de hierbas" 
                             style={{ 
                                 width: '100%',
                                 height: '100%',
                                 objectFit: 'cover',
-                                objectPosition: 'center top',
-                                filter: 'brightness(0.75) contrast(1.1) saturate(1.2)'
+                                objectPosition: 'center center',
+                                filter: 'brightness(0.85) contrast(1.0) saturate(1.0)'
                             }}
-                            onError={(e) => e.target.style.display = 'none'}
+                            onError={(e) => {
+                              console.error('Error loading newPotes.jpg');
+                              e.target.style.display = 'none';
+                            }}
                         />
                         {/* Overlay gradiente */}
                         <div style={{
@@ -159,9 +168,26 @@ function ProductList() {
                         }} />
                     </div>
                     
-                    <h1 style={{ color: '#3f4f36', textAlign: 'center', marginBottom: '40px', fontSize: '2.5em', fontWeight: '300', letterSpacing: '1px' }}>
-                        🌿 Catálogo Boticarium
-                    </h1>
+                    <header style={{ textAlign: 'center', marginBottom: '60px' }}>
+                        <h1 style={{ 
+                            color: '#3f4f36', 
+                            fontWeight: '700', 
+                            fontSize: '3.5em',
+                            letterSpacing: '2px',
+                            textTransform: 'none',
+                            margin: '0 0 10px 0'
+                        }}>
+                            Productos
+                        </h1>
+                        <p style={{ 
+                            color: '#8c6a3f', 
+                            fontSize: '1.4em', 
+                            fontStyle: 'italic',
+                            fontWeight: '300'
+                        }}>
+                            Selección de productos de elaboración propia
+                        </p>
+                    </header>
                     
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '20px' }}>
                         {products.map((product) => (

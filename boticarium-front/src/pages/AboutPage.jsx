@@ -112,7 +112,43 @@ function AboutPage() {
         padding: '60px 20px',
         color: colors.textMain
       }}>
-        <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+          
+          {/* Imagen barra.jpg - Header visual */}
+          <div style={{ 
+            position: 'relative',
+            width: '100%', 
+            height: '280px',
+            marginBottom: '40px',
+            borderRadius: '8px',
+            overflow: 'hidden',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.15)'
+          }}>
+            <img 
+              src={`${API_URL}/images/barra.jpg`}
+              alt="Boticarium - Quiénes somos" 
+              style={{ 
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center center',
+                filter: 'brightness(0.85) contrast(1.0) saturate(1.0)'
+              }}
+              onError={(e) => {
+                console.error('Error loading barra.jpg');
+                e.target.style.display = 'none';
+              }}
+            />
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'linear-gradient(135deg, rgba(62,44,30,0.3) 0%, rgba(107,143,113,0.2) 100%)',
+              pointerEvents: 'none'
+            }} />
+          </div>
           
           {/* --- ENCABEZADO --- */}
           <header style={{ textAlign: 'center', marginBottom: '60px' }}>
@@ -137,15 +173,14 @@ function AboutPage() {
           </header>
 
           {/* --- IMAGEN --- */}
-          <div style={{ marginBottom: '80px' }}>
+          <div style={{ marginBottom: '80px', textAlign: 'center' }}>
             <img
               src={imageUrl}
               alt="Laboratorio Boticarium"
               style={{ 
-                width: '100%', 
-                maxHeight: '500px', 
-                objectFit: 'cover', 
-                filter: 'sepia(10%) contrast(95%)' 
+                maxWidth: '100%',
+                height: 'auto',
+                display: 'inline-block'
               }}
               onError={(e) => { e.target.style.display = 'none'; }} 
             />

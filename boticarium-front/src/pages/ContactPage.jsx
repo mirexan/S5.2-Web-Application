@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { isAdmin } from '../utils/jwtUtils';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
 const DEFAULT_CONTACT = {
   name: 'Boticarium',
   address: 'Calle de la Herboristería, 12',
@@ -35,15 +37,67 @@ function ContactPage() {
   const mapSrc = `https://www.google.com/maps?q=${encodeURIComponent(contact.mapQuery)}&output=embed`;
 
   return (
-    <div style={{
-      background: 'linear-gradient(180deg, #f7f3eb 0%, #efe7d8 100%)',
-      minHeight: '100vh',
-      padding: '40px 20px'
-    }}>
-      <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-        <h1 style={{ color: '#3f4f36', textAlign: 'center', marginBottom: '30px', fontWeight: '300', letterSpacing: '1px' }}>
-           Contacto
-        </h1>
+    <>
+      <style>
+        {`
+          .fade-in { animation: fadeIn 1s ease-in; }
+          @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        `}
+      </style>
+      <div className="fade-in" style={{
+        background: 'linear-gradient(180deg, #f7f3eb 0%, #efe7d8 100%)',
+        minHeight: '100vh',
+        padding: '40px 20px'
+      }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+        
+        {/* Imagen contacto.jpg - Hero Section */}
+        <div style={{ 
+          position: 'relative',
+          width: '100%', 
+          height: '280px',
+          marginBottom: '40px',
+          borderRadius: '8px',
+          overflow: 'hidden',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.15)'
+        }}>
+          {/* Imagen */}
+          <img 
+            src={`${API_URL}/images/contacto.jpg`}
+            alt="Contacto Boticarium" 
+            style={{ 
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              objectPosition: 'center bottom',
+              filter: 'brightness(0.75) contrast(1.1) saturate(1.2)'
+            }}
+            onError={(e) => e.target.style.display = 'none'}
+          />
+          {/* Overlay gradiente */}
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'linear-gradient(135deg, rgba(62,44,30,0.3) 0%, rgba(107,143,113,0.2) 100%)',
+            pointerEvents: 'none'
+          }} />
+        </div>
+
+        <header style={{ textAlign: 'center', marginBottom: '60px' }}>
+          <h1 style={{ 
+            color: '#3f4f36', 
+            fontWeight: '700', 
+            fontSize: '3.5em',
+            letterSpacing: '2px',
+            textTransform: 'none',
+            margin: '0 0 10px 0'
+          }}>
+            Contacto
+          </h1>
+        </header>
 
         <div style={{ display: 'grid', gap: '20px', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))' }}>
           <div style={{
@@ -225,7 +279,8 @@ function ContactPage() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
 

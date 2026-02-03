@@ -19,7 +19,6 @@ function Footer() {
                 gridTemplateColumns: 'auto auto 1fr',
                 gap: '50px',
                 marginBottom: '30px',
-                padding: '0 60px',
                 justifyItems: 'start'
             }}>
                 {/* Sección Boticarium */}
@@ -64,12 +63,12 @@ function Footer() {
                 {/* Imagen más grande */}
                 <div style={{ textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', padding: '20px 0', width: '100%' }}>
                     <img 
-                        src={`${API_URL}/images/interior.png`}
+                        src={`${API_URL}/images/interior2.jpg`}
                         alt="Interior de Boticarium" 
                         style={{ 
-                            maxWidth: '280px',
-                            minWidth: '200px',
-                            maxHeight: '180px', 
+                            maxWidth: '340px',
+                            minWidth: '220px',
+                            maxHeight: '220px', 
                             height: 'auto', 
                             borderRadius: '8px',
                             opacity: '0.9',
