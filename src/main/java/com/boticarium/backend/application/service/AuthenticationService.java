@@ -90,7 +90,7 @@ public class AuthenticationService {
 					.email(email)
 					.password(passwordEncoder.encode("google-oauth-user"))  // No usa contraseña
 					.role(Role.USER)
-					.points(350) // Puntos iniciales para demostración de descuentos (Nivel 2)
+					.points(0) // Puntos iniciales
 					.build();
 			userRepository.save(newUser);
 		}

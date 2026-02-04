@@ -96,7 +96,9 @@ public class UserService {
 				user.getEmail(),
 				user.getPhone(),
 				user.getRole(),
-				user.getPoints()
+				user.getPoints(),
+				user.getCreatedAt(),
+				user.getLevel()
 		);
 	}
 }

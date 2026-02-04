@@ -27,9 +27,18 @@ function Footer() {
                         color: '#e7d3b6', 
                         marginBottom: '15px',
                         fontSize: '1.3em',
-                        fontWeight: '600'
+                        fontWeight: '600',
+                        display: 'flex',
+                        alignItems: 'flex-end',
+                        gap: '10px',
+                        lineHeight: '1'
                     }}>
-                        🌿 Boticarium
+                        <img 
+                            src="/logo.png" 
+                            alt="Boticarium Logo" 
+                            style={{ height: '32px', width: 'auto', filter: 'brightness(1.2)', flexShrink: 0, display: 'block' }}
+                        />
+                        Boticarium
                     </h3>
                     <p style={{ 
                         color: '#d4c3ab',

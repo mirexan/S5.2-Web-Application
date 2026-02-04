@@ -31,10 +31,17 @@ function Navbar() {
         }}>
             {/* LOGO O NOMBRE DE LA TIENDA */}
             <div 
-                style={{ fontSize: '1.6em', fontWeight: '700', cursor: 'pointer', letterSpacing: '0.5px' }}
+              style={{ display: 'flex', alignItems: 'flex-end', gap: '10px', cursor: 'pointer' }}
                 onClick={() => navigate('/products')}
             >
-                🌿 Boticarium
+                <img 
+                    src="/logo.png" 
+                    alt="Boticarium Logo" 
+                style={{ height: '40px', width: 'auto', display: 'block' }}
+                />
+              <span style={{ fontSize: '1.6em', fontWeight: '700', letterSpacing: '0.5px', lineHeight: '1' }}>
+                    Boticarium
+                </span>
             </div>
 
             <div>

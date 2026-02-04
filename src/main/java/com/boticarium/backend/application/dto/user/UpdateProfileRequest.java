@@ -7,7 +7,6 @@ public record UpdateProfileRequest(
 		@NotBlank(message = "Email is mandatory")
 		@Email(message = "Non valid email format")
 		String email,
-		@NotBlank(message = "Phone is mandatory")
-		String phone
+		String phone // Opcional
 ) {
 }

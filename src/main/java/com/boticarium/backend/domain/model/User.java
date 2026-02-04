@@ -9,6 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -30,7 +31,7 @@ public class User implements UserDetails {
 	@Column(unique = true, nullable = false)
 	private String email;
 
-	@Column(nullable = false)
+	@Column(nullable = true)
 	private String phone;
 
 	@Enumerated(EnumType.STRING)
@@ -38,6 +39,10 @@ public class User implements UserDetails {
 
 	@Builder.Default
 	private Integer points = 0;
+
+	@Column(nullable = false, updatable = false)
+	@Builder.Default
+	private LocalDateTime createdAt = LocalDateTime.now();
 	
 	/**
 	 * Calcula el nivel del usuario basado en sus puntos:
