@@ -6,6 +6,7 @@ function RegisterPage() {
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [phone, setPhone] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
@@ -17,7 +18,7 @@ function RegisterPage() {
         setLoading(true);
 
         try {
-            const data = await registerUser(username, email, password);
+            const data = await registerUser(username, email, password, phone || null);
             const token = data.token;
             localStorage.setItem('token', token);
 
@@ -81,6 +82,20 @@ function RegisterPage() {
                             style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e1d3bf' }}
                             required
                         />
+                    </div>
+
+                    <div style={{ marginBottom: '12px' }}>
+                        <label style={{ color: '#5a4a3c', fontWeight: '600' }}>
+                            Teléfono: <span style={{ fontSize: '14px', color: '#8c6a3f', fontStyle: 'italic', fontWeight: '400' }}>(recomendable)</span>
+                        </label>
+                        <input
+                            type="tel"
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            placeholder="ej: 34600000000"
+                            style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e1d3bf' }}
+                        />
+                        <p style={{ fontSize: '13px', color: '#8c6a3f', fontStyle: 'italic', margin: '5px 0 0 0' }}>Te ayudará a recibir notificaciones por WhatsApp</p>
                     </div>
 
                     {error && <p style={{ color: '#8a5a44', fontWeight: '600' }}>{error}</p>}

@@ -19,12 +19,13 @@ export const loginUser = async (username, password) =>{
     }
 };
 
-export const registerUser = async (username, email, password) =>{
+export const registerUser = async (username, email, password, phone = null) =>{
     try{
         const response = await axios.post(`${API_URL}/register`,{
         username: username,
         email: email,
-        password: password
+        password: password,
+        phone: phone
         });
         if (response.data.token){
             localStorage.setItem('token', response.data.token);

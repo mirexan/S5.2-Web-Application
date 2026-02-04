@@ -112,7 +112,7 @@ function ContactPage() {
               {contact.city}
             </p>
             <p style={{ color: '#5a4a3c', lineHeight: '1.7' }}>
-              📞 {contact.phone}<br />
+              📞 {contact.phone || <span style={{ fontStyle: 'italic', color: '#8c6a3f' }}>(recomendable)</span>}<br />
               ✉️ {contact.email}
             </p>
             <p style={{ color: '#5a4a3c', lineHeight: '1.7', whiteSpace: 'pre-line' }}>
@@ -163,7 +163,7 @@ function ContactPage() {
                     type="text"
                     value={contact.phone}
                     onChange={(e) => setContact({ ...contact, phone: e.target.value })}
-                    placeholder="Teléfono"
+                    placeholder="Teléfono (recomendable)"
                     style={{ padding: '10px', borderRadius: '8px', border: '1px solid #e1d3bf' }}
                   />
                     <input

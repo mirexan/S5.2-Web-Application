@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { isAdmin } from '../utils/jwtUtils';
 import { getAllProducts } from '../services/productService';
@@ -12,6 +12,7 @@ function AdminPanel() {
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [users, setUsers] = useState([]);
+  const [expandedUserId, setExpandedUserId] = useState(null);
   const [currentOrderPage, setCurrentOrderPage] = useState(0);
   const [totalOrderPages, setTotalOrderPages] = useState(0);
   const ITEMS_PER_PAGE = 15;
@@ -768,6 +769,7 @@ function AdminPanel() {
               <table style={{ width: '100%', borderCollapse: 'collapse', background: 'white' }}>
                 <thead>
                   <tr style={{ background: '#f0f0f0', borderBottom: '2px solid #ddd' }}>
+                    <th style={{ padding: '10px', textAlign: 'center', width: '40px' }}>⬇️</th>
                     <th style={{ padding: '10px', textAlign: 'left' }}>ID</th>
                     <th style={{ padding: '10px', textAlign: 'left' }}>Usuario</th>
                     <th style={{ padding: '10px', textAlign: 'left' }}>Email</th>
@@ -778,39 +780,135 @@ function AdminPanel() {
                 </thead>
                 <tbody>
                   {users.map((user, idx) => (
-                    <tr key={user.id} style={{ borderBottom: '1px solid #ddd', background: idx % 2 === 0 ? 'white' : '#f9f9f9' }}>
-                      <td style={{ padding: '10px' }}>{user.id}</td>
-                      <td style={{ padding: '10px', fontWeight: 'bold' }}>{user.username}</td>
-                      <td style={{ padding: '10px' }}>{user.email}</td>
-                      <td style={{ padding: '10px' }}>
-                        <span style={{
-                          background: user.role === 'ADMIN' ? '#cce5ff' : '#e8f0e4',
-                          color: user.role === 'ADMIN' ? '#004085' : '#155724',
-                          padding: '4px 8px',
-                          borderRadius: '4px',
-                          fontSize: '0.9em',
-                          fontWeight: 'bold'
-                        }}>
-                          {user.role === 'ADMIN' ? '🎓 ' : ''}{user.role}
-                        </span>
-                      </td>
-                      <td style={{ padding: '10px' }}>{new Date(user.createdAt).toLocaleDateString('es-ES')}</td>
-                      <td style={{ padding: '10px', textAlign: 'center' }}>
-                        <button
-                          onClick={() => handleDeleteUser(user.id)}
-                          style={{
-                            padding: '5px 10px',
-                            background: '#dc3545',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '3px',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          🗑️ Eliminar
-                        </button>
-                      </td>
-                    </tr>
+                    <React.Fragment key={user.id}>
+                      <tr style={{ borderBottom: '1px solid #ddd', background: idx % 2 === 0 ? 'white' : '#f9f9f9' }}>
+                        <td style={{ padding: '10px', textAlign: 'center' }}>
+                          <button
+                            onClick={() => setExpandedUserId(expandedUserId === user.id ? null : user.id)}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              cursor: 'pointer',
+                              fontSize: '16px',
+                              padding: '0'
+                            }}
+                          >
+                            {expandedUserId === user.id ? '▼' : '▶'}
+                          </button>
+                        </td>
+                        <td style={{ padding: '10px' }}>{user.id}</td>
+                        <td style={{ padding: '10px', fontWeight: 'bold' }}>{user.username}</td>
+                        <td style={{ padding: '10px' }}>{user.email}</td>
+                        <td style={{ padding: '10px' }}>
+                          <span style={{
+                            background: user.role === 'ADMIN' ? '#cce5ff' : '#e8f0e4',
+                            color: user.role === 'ADMIN' ? '#004085' : '#155724',
+                            padding: '4px 8px',
+                            borderRadius: '4px',
+                            fontSize: '0.9em',
+                            fontWeight: 'bold'
+                          }}>
+                            {user.role === 'ADMIN' ? '🎓 ' : ''}{user.role}
+                          </span>
+                        </td>
+                        <td style={{ padding: '10px' }}>
+                          {user.createdAt ? new Date(user.createdAt).toLocaleDateString('es-ES', { 
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          }) : 'N/A'}
+                        </td>
+                        <td style={{ padding: '10px', textAlign: 'center' }}>
+                          <button
+                            onClick={() => handleDeleteUser(user.id)}
+                            style={{
+                              padding: '5px 10px',
+                              background: '#dc3545',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '3px',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            🗑️ Eliminar
+                          </button>
+                        </td>
+                      </tr>
+                      {/* FILA EXPANDIDA CON DETALLES */}
+                      {expandedUserId === user.id && (
+                        <tr style={{ background: '#f5f5f5', borderBottom: '2px solid #ddd' }}>
+                          <td colSpan="7" style={{ padding: '20px' }}>
+                            <div style={{ maxWidth: '600px' }}>
+                              <h3 style={{ marginTop: '0', color: '#333' }}>📋 Detalles Completos</h3>
+                              <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: '1fr 1fr',
+                                gap: '15px',
+                                fontSize: '0.95em'
+                              }}>
+                                <div>
+                                  <strong>ID del Usuario:</strong>
+                                  <p style={{ margin: '5px 0', color: '#666' }}>{user.id}</p>
+                                </div>
+                                <div>
+                                  <strong>Nombre de Usuario:</strong>
+                                  <p style={{ margin: '5px 0', color: '#666' }}>{user.username}</p>
+                                </div>
+                                <div>
+                                  <strong>Correo Electrónico:</strong>
+                                  <p style={{ margin: '5px 0', color: '#666' }}>{user.email}</p>
+                                </div>
+                                <div>
+                                  <strong>Teléfono:</strong>
+                                  <p style={{ margin: '5px 0', color: '#666' }}>
+                                    {user.phone ? user.phone : <em style={{ color: '#999' }}>No registrado</em>}
+                                  </p>
+                                </div>
+                                <div>
+                                  <strong>Rol:</strong>
+                                  <p style={{ margin: '5px 0', color: '#666' }}>
+                                    <span style={{
+                                      background: user.role === 'ADMIN' ? '#cce5ff' : '#e8f0e4',
+                                      color: user.role === 'ADMIN' ? '#004085' : '#155724',
+                                      padding: '4px 8px',
+                                      borderRadius: '4px',
+                                      fontWeight: 'bold',
+                                      display: 'inline-block'
+                                    }}>
+                                      {user.role === 'ADMIN' ? '🎓 Administrador' : '👤 Usuario'}
+                                    </span>
+                                  </p>
+                                </div>
+                                <div>
+                                  <strong>Puntos de Compra:</strong>
+                                  <p style={{ margin: '5px 0', color: '#666' }}>⭐ {user.points || 0} pts</p>
+                                </div>
+                                <div>
+                                  <strong>Nivel:</strong>
+                                  <p style={{ margin: '5px 0', color: '#666' }}>
+                                    {user.level === 3 ? '🥇 Nivel 3 (500+ pts)' : user.level === 2 ? '🥈 Nivel 2 (200-499 pts)' : '🥉 Nivel 1 (0-199 pts)'}
+                                  </p>
+                                </div>
+                                <div>
+                                  <strong>Fecha de Registro:</strong>
+                                  <p style={{ margin: '5px 0', color: '#666' }}>
+                                    {user.createdAt ? new Date(user.createdAt).toLocaleDateString('es-ES', { 
+                                      year: 'numeric',
+                                      month: 'long',
+                                      day: 'numeric',
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    }) : 'N/A'}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
                   ))}
                 </tbody>
               </table>

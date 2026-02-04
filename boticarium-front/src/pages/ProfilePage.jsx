@@ -261,7 +261,10 @@ function ProfilePage() {
                 </div>
                 <div style={{ marginBottom: '20px' }}>
                   <label style={{ fontWeight: 'bold', color: '#8c6a3f' }}>Teléfono:</label>
-                  <p style={{ color: '#5a4a3c', fontSize: '16px' }}>{userData.phone || 'No registrado'}</p>
+                  <p style={{ color: '#5a4a3c', fontSize: '16px' }}>
+                    {userData.phone || 'No registrado'} 
+                    {!userData.phone && <span style={{ fontSize: '14px', color: '#8c6a3f', fontStyle: 'italic' }}> (recomendable para agilizar comunicación por WhatsApp)</span>}
+                  </p>
                 </div>
                 <button
                   onClick={() => setEditing(true)}
@@ -321,6 +324,7 @@ function ProfilePage() {
                 <div style={{ marginBottom: '15px' }}>
                   <label style={{ fontWeight: 'bold', color: '#8c6a3f', display: 'block', marginBottom: '5px' }}>
                     Teléfono (ej: 34600000000):
+                    <span style={{ fontSize: '14px', color: '#8c6a3f', fontStyle: 'italic', fontWeight: '400' }}> (recomendable)</span>
                   </label>
                   <input
                     type="tel"
