@@ -7,13 +7,16 @@ import AdminPanel from './pages/AdminPanel';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import ProfilePage from './pages/ProfilePage';
+import InvoicePage from './pages/InvoicePage';
 import Navbar from './components/Navbar';
 import SubNavbar from './components/SubNavbar';
 import Footer from './components/Footer';
+import Toast from './components/Toast';
 
 function App() {
   return (
     <BrowserRouter>
+    <Toast />
     <Navbar />
     <SubNavbar />
       <Routes>
@@ -28,6 +31,7 @@ function App() {
         <Route path="/contact" element={<ContactPage />} />
 
         <Route path="/cart" element={<CartPage />} />
+        <Route path="/invoice" element={<InvoicePage />} />
         <Route path="/profile" element={<ProfilePage />} />
 
         <Route path="/admin" element={<AdminPanel />} />

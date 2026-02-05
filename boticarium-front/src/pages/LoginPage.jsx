@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loginUser, loginWithGoogle } from '../services/authService';
 import { GoogleLogin } from '@react-oauth/google';
+import { showToast } from '../components/Toast';
 
 function LoginPage() {
     const [username, setUsername] = useState('');
@@ -22,7 +23,7 @@ function LoginPage() {
             localStorage.setItem('token', token);
             
             window.dispatchEvent(new Event("storage"));
-            alert("¡Bienvenido " + username + "!");
+            showToast(`¡Bienvenido ${username}!`, 'success');
             navigate('/products');
             window.location.reload();
         }
@@ -44,7 +45,7 @@ function LoginPage() {
             localStorage.setItem('token', token);
             
             window.dispatchEvent(new Event("storage"));
-            alert("Se ha iniciado sesión con Google");
+            showToast("Se ha iniciado sesión con Google", 'success');
             navigate('/products');
             window.location.reload();
         } catch (err) {

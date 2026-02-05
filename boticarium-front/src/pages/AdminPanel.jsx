@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { isAdmin } from '../utils/jwtUtils';
 import { getAllProducts } from '../services/productService';
+import ImageGalleryModal from '../components/ImageGalleryModal';
+import { cleanErrorMessage } from '../utils/errorUtils';
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
@@ -35,6 +37,8 @@ function AdminPanel() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [showImageGallery, setShowImageGallery] = useState(false);
+  const formRef = useRef(null);
 
   // Verificar si es admin
   useEffect(() => {
@@ -140,7 +144,7 @@ function AdminPanel() {
       setEditingId(null);
       fetchProducts();
     } catch (err) {
-      setError(`❌ Error: ${err.response?.data?.message || err.message}`);
+      setError(`❌ Error: ${cleanErrorMessage(err.response?.data?.message || err.message)}`);
       console.error(err);
     }
   };
@@ -161,6 +165,10 @@ function AdminPanel() {
       ingredients: product.ingredients || '',
       usageInstructions: product.usageInstructions || ''
     });
+    // Scroll to top after state update
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 100);
   };
 
   const handleImageUpload = async (e) => {
@@ -182,7 +190,7 @@ function AdminPanel() {
       setFormData(prev => ({ ...prev, imgUrl: imageUrl }));
       setImagePreview(imageUrl);
     } catch (err) {
-      setError(`❌ Error al subir imagen: ${err.response?.data?.error || err.message}`);
+      setError(`❌ Error al subir imagen: ${cleanErrorMessage(err.response?.data?.error || err.message)}`);
       console.error(err);
     } finally {
       setUploading(false);
@@ -206,6 +214,12 @@ function AdminPanel() {
     });
   };
 
+  const handleSelectImageFromGallery = (imageUrl) => {
+    setFormData(prev => ({ ...prev, imgUrl: imageUrl }));
+    setImagePreview(imageUrl);
+    setShowImageGallery(false);
+  };
+
   const handleDelete = async (id) => {
     if (!window.confirm('¿Estás seguro de que quieres eliminar este producto?')) return;
 
@@ -217,7 +231,7 @@ function AdminPanel() {
       setSuccess('✅ Producto eliminado correctamente');
       fetchProducts();
     } catch (err) {
-      setError(`❌ Error al eliminar: ${err.message}`);
+      setError(`❌ Error al eliminar: ${cleanErrorMessage(err.message)}`);
     }
   };
 
@@ -232,7 +246,7 @@ function AdminPanel() {
       setSuccess('✅ Usuario eliminado correctamente');
       fetchUsers();
     } catch (err) {
-      setError(`❌ Error al eliminar usuario: ${err.message}`);
+      setError(`❌ Error al eliminar usuario: ${cleanErrorMessage(err.message)}`);
     }
   };
 
@@ -245,7 +259,7 @@ function AdminPanel() {
       setSuccess(`✅ Pedido actualizado a ${newStatus}`);
       fetchOrders(currentOrderPage);
     } catch (err) {
-      setError(`❌ Error al actualizar pedido: ${err.message}`);
+      setError(`❌ Error al actualizar pedido: ${cleanErrorMessage(err.message)}`);
     }
   };
 
@@ -303,242 +317,280 @@ function AdminPanel() {
       {/* PESTAÑA: PRODUCTOS */}
       {activeTab === 'products' && (
         <div>
-          {/* Formulario */}
-          <div style={{ background: '#f9f9f9', padding: '20px', borderRadius: '10px', marginBottom: '30px' }}>
-        <h2>{editingId ? '✏️ Editar Producto' : '➕ Crear Nuevo Producto'}</h2>
-        <form onSubmit={handleSubmit}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
-            <div>
-              <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '5px', color: '#6b8f71' }}>
-                🏷️ Nombre del Producto *
-              </label>
-              <input
-                type="text"
-                name="name"
-                placeholder="Ej: Té de manzanilla"
-                value={formData.name}
-                onChange={handleInputChange}
-                required
-                style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '5px', width: '100%' }}
-              />
-            </div>
-            <div>
-              <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '5px', color: '#6b8f71' }}>
-                📦 Cantidad en Stock *
-              </label>
-              <input
-                type="number"
-                name="stockQuantity"
-                placeholder="Cantidad en stock"
-                value={formData.stockQuantity}
-                onChange={handleInputChange}
-                required
-                style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '5px', width: '100%' }}
-              />
-            </div>
-            <div style={{ gridColumn: '1 / -1' }}>
-              <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '5px', color: '#6b8f71' }}>
-                📝 Descripción
-              </label>
-              <input
-                type="text"
-                name="description"
-                placeholder="Descripción"
-                value={formData.description}
-                onChange={handleInputChange}
-                style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '5px', width: '100%' }}
-              />
-            </div>
-            <div>
-              <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '5px', color: '#6b8f71' }}>
-                💰 Precio Base (€) *
-              </label>
-              <input
-                type="number"
-                name="basePrice"
-                placeholder="Precio base (€)"
-                value={formData.basePrice}
-                onChange={handleInputChange}
-                step="0.01"
-                required
-                style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '5px', width: '100%' }}
-              />
-            </div>
-            <div>
-              <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '5px', color: '#8c6a3f' }}>
-                🏭 Precio de Coste (€)
-              </label>
-              <input
-                type="number"
-                name="costPrice"
-                placeholder="Ej: 15.50 (para calcular el margen de beneficio)"
-                value={formData.costPrice}
-                onChange={handleInputChange}
-                step="0.01"
-                style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '5px', width: '100%' }}
-              />
-            </div>
-          </div>
-
-          {/* Resumen de Margen de Beneficio */}
-          {formData.costPrice && formData.basePrice && (
+          {/* Banner de edición */}
+          {editingId && (
             <div style={{
-              background: '#f0f9ff',
-              border: '2px solid #6b8f71',
-              borderRadius: '8px',
-              padding: '15px',
-              marginBottom: '20px'
+              background: 'linear-gradient(135deg, #654321 0%, #B87333 100%)',
+              color: 'white',
+              padding: '15px 20px',
+              borderRadius: '10px',
+              marginBottom: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              fontSize: '16px',
+              fontWeight: 'bold'
             }}>
-              <h4 style={{ color: '#6b8f71', marginTop: 0, marginBottom: '10px' }}>📊 Análisis de Precios</h4>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px', fontSize: '0.95em' }}>
-                <div>
-                  <span style={{ color: '#666', fontSize: '0.85em' }}>Coste:</span>
-                  <p style={{ margin: '5px 0', fontWeight: 'bold', color: '#8c6a3f', fontSize: '1.15em' }}>
-                    {parseFloat(formData.costPrice).toFixed(2)} €
-                  </p>
-                </div>
-                <div>
-                  <span style={{ color: '#666', fontSize: '0.85em' }}>Precio Base:</span>
-                  <p style={{ margin: '5px 0', fontWeight: 'bold', color: '#6b8f71', fontSize: '1.15em' }}>
-                    {parseFloat(formData.basePrice).toFixed(2)} €
-                  </p>
-                </div>
-                <div>
-                  <span style={{ color: '#666', fontSize: '0.85em' }}>Margen de Beneficio:</span>
-                  <p style={{ margin: '5px 0', fontWeight: 'bold', color: '#28a745', fontSize: '1.15em' }}>
-                    {((formData.basePrice - formData.costPrice) / formData.costPrice * 100).toFixed(1)}%
-                  </p>
-                </div>
-              </div>
+              ✏️ Editando Producto: <span style={{ fontStyle: 'italic' }}>{formData.name}</span>
             </div>
           )}
-
-          {/* Descuentos por Nivel */}
-          <div style={{ marginBottom: '20px' }}>
-            <h4 style={{ color: '#6b8f71', marginBottom: '12px' }}>🎯 Descuentos por Nivel</h4>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr 1fr',
-              gap: '15px'
-            }}>
-              <div>
-                <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '5px', color: '#6b8f71' }}>
-                  🥉 Nivel 1 (%)
-                </label>
-                <input
-                  type="number"
-                  name="discountLevel1"
-                  placeholder="Descuento Nivel 1"
-                  value={formData.discountLevel1}
-                  onChange={handleInputChange}
-                  style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '5px', width: '100%' }}
-                />
-              </div>
-              <div>
-                <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '5px', color: '#6b8f71' }}>
-                  🥈 Nivel 2 (%)
-                </label>
-                <input
-                  type="number"
-                  name="discountLevel2"
-                  placeholder="Descuento Nivel 2"
-                  value={formData.discountLevel2}
-                  onChange={handleInputChange}
-                  style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '5px', width: '100%' }}
-                />
-              </div>
-              <div>
-                <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '5px', color: '#6b8f71' }}>
-                  🥇 Nivel 3 (%)
-                </label>
-                <input
-                  type="number"
-                  name="discountLevel3"
-                  placeholder="Descuento Nivel 3"
-                  value={formData.discountLevel3}
-                  onChange={handleInputChange}
-                  style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '5px', width: '100%' }}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Sección de Imagen */}
-          <div style={{ 
-            background: '#fafafa', 
-            border: '2px solid #ddd',
-            borderRadius: '8px',
-            padding: '20px',
-            marginBottom: '20px' 
-          }}>
-            <h4 style={{ color: '#6b8f71', marginTop: 0, marginBottom: '15px' }}>📸 Imagen del Producto</h4>
+          
+          {/* Formulario */}
+          <div ref={formRef} style={{ background: '#f9f9f9', padding: '20px', borderRadius: '10px', marginBottom: '30px' }}>
+        <h2>{editingId ? '✏️ Editar Producto' : '➕ Crear Nuevo Producto'}</h2>
+        <form onSubmit={handleSubmit}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '20px' }}>
             
-            {/* Preview de imagen */}
-            {imagePreview && (
-              <div style={{ marginBottom: '15px', textAlign: 'center' }}>
-                <img 
-                  src={imagePreview} 
-                  alt="Preview" 
-                  style={{ maxWidth: '200px', maxHeight: '200px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
+            {/* COLUMNA IZQUIERDA */}
+            <div>
+              {/* Nombre y Stock */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
+                <div>
+                  <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '5px', color: '#6b8f71' }}>
+                    🏷️ Nombre del Producto *
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    placeholder="Ej: Té de manzanilla"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    required
+                    style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '5px', width: '100%' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '5px', color: '#6b8f71' }}>
+                    📦 Cantidad en Stock *
+                  </label>
+                  <input
+                    type="number"
+                    name="stockQuantity"
+                    placeholder="Cantidad en stock"
+                    value={formData.stockQuantity}
+                    onChange={handleInputChange}
+                    required
+                    style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '5px', width: '100%' }}
+                  />
+                </div>
+              </div>
+
+              {/* Descripción */}
+              <div style={{ marginBottom: '15px' }}>
+                <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '5px', color: '#6b8f71' }}>
+                  📝 Descripción
+                </label>
+                <input
+                  type="text"
+                  name="description"
+                  placeholder="Descripción"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '5px', width: '100%' }}
                 />
               </div>
-            )}
 
-            {/* Subir nueva imagen */}
-            <div style={{ marginBottom: '15px' }}>
-              <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '8px', color: '#333' }}>
-                📤 Subir Nueva Imagen
-              </label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                disabled={uploading}
-                style={{ 
-                  padding: '10px', 
-                  border: '2px solid #6b8f71', 
+              {/* Ingredientes e Instrucciones - MOVIDO AQUÍ */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
+                <textarea
+                  name="ingredients"
+                  placeholder="📋 Ingredientes (uno por línea)"
+                  value={formData.ingredients}
+                  onChange={handleInputChange}
+                  rows="4"
+                  style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '5px', fontFamily: 'monospace' }}
+                />
+                <textarea
+                  name="usageInstructions"
+                  placeholder="📝 Instrucciones de uso"
+                  value={formData.usageInstructions}
+                  onChange={handleInputChange}
+                  rows="4"
+                  style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '5px', fontFamily: 'monospace' }}
+                />
+              </div>
+
+              {/* Precios */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
+                <div>
+                  <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '5px', color: '#6b8f71' }}>
+                    💰 Precio Base (€) *
+                  </label>
+                  <input
+                    type="number"
+                    name="basePrice"
+                    placeholder="Precio base (€)"
+                    value={formData.basePrice}
+                    onChange={handleInputChange}
+                    step="0.01"
+                    required
+                    style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '5px', width: '100%' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '5px', color: '#8c6a3f' }}>
+                    🏭 Precio de Coste (€)
+                  </label>
+                  <input
+                    type="number"
+                    name="costPrice"
+                    placeholder="Ej: 15.50 (para calcular el margen de beneficio)"
+                    value={formData.costPrice}
+                    onChange={handleInputChange}
+                    step="0.01"
+                    style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '5px', width: '100%' }}
+                  />
+                </div>
+              </div>
+
+              {/* Resumen de Margen de Beneficio */}
+              {formData.costPrice && formData.basePrice && (
+                <div style={{
+                  background: '#f0f9ff',
+                  border: '2px solid #6b8f71',
+                  borderRadius: '8px',
+                  padding: '15px',
+                  marginBottom: '20px'
+                }}>
+                  <h4 style={{ color: '#6b8f71', marginTop: 0, marginBottom: '10px' }}>📊 Análisis de Precios</h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px', fontSize: '0.95em' }}>
+                    <div>
+                      <span style={{ color: '#666', fontSize: '0.85em' }}>Coste:</span>
+                      <p style={{ margin: '5px 0', fontWeight: 'bold', color: '#8c6a3f', fontSize: '1.15em' }}>
+                        {parseFloat(formData.costPrice).toFixed(2)} €
+                      </p>
+                    </div>
+                    <div>
+                      <span style={{ color: '#666', fontSize: '0.85em' }}>Precio Base:</span>
+                      <p style={{ margin: '5px 0', fontWeight: 'bold', color: '#6b8f71', fontSize: '1.15em' }}>
+                        {parseFloat(formData.basePrice).toFixed(2)} €
+                      </p>
+                    </div>
+                    <div>
+                      <span style={{ color: '#666', fontSize: '0.85em' }}>Margen de Beneficio:</span>
+                      <p style={{ margin: '5px 0', fontWeight: 'bold', color: '#28a745', fontSize: '1.15em' }}>
+                        {((formData.basePrice - formData.costPrice) / formData.costPrice * 100).toFixed(1)}%
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Descuentos por Nivel */}
+              <div style={{ marginBottom: '20px' }}>
+                <h4 style={{ color: '#6b8f71', marginBottom: '12px' }}>🎯 Descuentos por Nivel</h4>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr 1fr',
+                  gap: '15px'
+                }}>
+                  <div>
+                    <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '5px', color: '#6b8f71' }}>
+                      🥉 Nivel 1 (%)
+                    </label>
+                    <input
+                      type="number"
+                      name="discountLevel1"
+                      placeholder="Descuento Nivel 1"
+                      value={formData.discountLevel1}
+                      onChange={handleInputChange}
+                      style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '5px', width: '100%' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '5px', color: '#6b8f71' }}>
+                      🥈 Nivel 2 (%)
+                    </label>
+                    <input
+                      type="number"
+                      name="discountLevel2"
+                      placeholder="Descuento Nivel 2"
+                      value={formData.discountLevel2}
+                      onChange={handleInputChange}
+                      style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '5px', width: '100%' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '5px', color: '#6b8f71' }}>
+                      🥇 Nivel 3 (%)
+                    </label>
+                    <input
+                      type="number"
+                      name="discountLevel3"
+                      placeholder="Descuento Nivel 3"
+                      value={formData.discountLevel3}
+                      onChange={handleInputChange}
+                      style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '5px', width: '100%' }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* COLUMNA DERECHA - IMAGEN (COMPACTA) */}
+            <div style={{ 
+              background: '#fafafa', 
+              border: '2px solid #ddd',
+              borderRadius: '8px',
+              padding: '15px',
+              height: 'fit-content',
+              position: 'sticky',
+              top: '20px'
+            }}>
+              <h4 style={{ color: '#6b8f71', marginTop: 0, marginBottom: '12px', fontSize: '0.95em' }}>📸 Imagen</h4>
+              
+              {/* Preview de imagen */}
+              {imagePreview && (
+                <div style={{ marginBottom: '12px', textAlign: 'center' }}>
+                  <img 
+                    src={imagePreview} 
+                    alt="Preview" 
+                    style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '6px', boxShadow: '0 2px 6px rgba(0,0,0,0.1)' }}
+                  />
+                </div>
+              )}
+
+              {/* Botones de opción */}
+              <button
+                type="button"
+                onClick={() => setShowImageGallery(true)}
+                style={{
+                  padding: '8px 10px',
+                  background: '#6b8f71',
+                  color: 'white',
+                  border: 'none',
                   borderRadius: '5px',
-                  width: '100%'
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                  width: '100%',
+                  marginBottom: '8px',
+                  fontSize: '0.9em'
                 }}
-              />
-              {uploading && <p style={{ fontSize: '0.9em', color: '#666', marginTop: '5px' }}>⏳ Subiendo imagen...</p>}
-            </div>
+              >
+                📂 Galería
+              </button>
 
-            {/* O URL manual */}
-            <div>
-              <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '8px', color: '#333' }}>
-                🔗 O Ingresa la Ruta de la Imagen Manualmente
-              </label>
-              <p style={{ fontSize: '0.85em', color: '#666', marginBottom: '8px' }}>
-                💡 Las imágenes subidas se guardan en: <code style={{ background: '#f0f0f0', padding: '2px 6px', borderRadius: '3px' }}>/uploads/</code>
-              </p>
-              <input
-                type="text"
-                name="imgUrl"
-                placeholder="Ej: /uploads/te-manzanilla.jpg"
-                value={formData.imgUrl}
-                onChange={handleInputChange}
-                style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '5px', width: '100%' }}
-              />
+              {/* Subir nueva imagen */}
+              <div>
+                <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '6px', color: '#333', fontSize: '0.9em' }}>
+                  📤 Subir
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  disabled={uploading}
+                  style={{ 
+                    padding: '6px', 
+                    border: '1px solid #6b8f71', 
+                    borderRadius: '5px',
+                    width: '100%',
+                    fontSize: '0.85em'
+                  }}
+                />
+                {uploading && <p style={{ fontSize: '0.8em', color: '#666', marginTop: '4px', margin: '4px 0 0 0' }}>⏳ Subiendo...</p>}
+              </div>
             </div>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
-            <textarea
-              name="ingredients"
-              placeholder="📋 Ingredientes (uno por línea)"
-              value={formData.ingredients}
-              onChange={handleInputChange}
-              rows="6"
-              style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '5px', fontFamily: 'monospace' }}
-            />
-            <textarea
-              name="usageInstructions"
-              placeholder="📝 Instrucciones de uso"
-              value={formData.usageInstructions}
-              onChange={handleInputChange}
-              rows="6"
-              style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '5px', fontFamily: 'monospace' }}
-            />
           </div>
 
           <div style={{ display: 'flex', gap: '10px' }}>
@@ -679,7 +731,7 @@ function AdminPanel() {
                           >
                             <option value="PENDING">PENDING</option>
                             <option value="COMPLETED">COMPLETED</option>
-                            <option value="CANCELLED">CANCELLED</option>
+                            <option value="CANCELED">CANCELED</option>
                           </select>
                         </td>
                         <td style={{ padding: '10px' }}>{new Date(order.createdAt).toLocaleDateString('es-ES')}</td>
@@ -916,8 +968,18 @@ function AdminPanel() {
           )}
         </div>
       )}
+      
+      {/* Image Gallery Modal */}
+      <ImageGalleryModal 
+        isOpen={showImageGallery}
+        onClose={() => setShowImageGallery(false)}
+        onSelectImage={handleSelectImageFromGallery}
+      />
     </div>
   );
 }
 
 export default AdminPanel;
+
+
+

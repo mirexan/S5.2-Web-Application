@@ -110,7 +110,7 @@ function ContactPage() {
             gap: '20px',
             alignItems: 'flex-start'
           }}>
-            <div style={{ flex: 1 }}>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
               <h2 style={{ color: '#6b8f71', marginTop: 0 }}>
                 {contact.name}
               </h2>
@@ -131,15 +131,18 @@ function ContactPage() {
                   target="_blank"
                   rel="noreferrer"
                   style={{
-                    display: 'inline-block',
+                    display: 'block',
                     background: 'linear-gradient(135deg, #7a9b76 0%, #6b8f71 100%)',
                     color: 'white',
-                    padding: '12px 18px',
+                    padding: '12px 20px',
                     borderRadius: '10px',
                     textDecoration: 'none',
                     fontWeight: '700',
                     boxShadow: '0 4px 12px rgba(107, 143, 113, 0.35)',
-                    marginTop: '12px'
+                    marginTop: '24px',
+                    marginBottom: '12px',
+                    width: '188px',
+                    textAlign: 'center'
                   }}
                 >
                   💬 Escribir por WhatsApp
@@ -157,6 +160,30 @@ function ContactPage() {
                   Inicia sesión para contactar por WhatsApp.
                 </div>
               )}
+              
+              {/* Botón Editar - MOVIDO AQUÍ */}
+              {adminRole && !editing && (
+                <button
+                  onClick={() => setEditing(true)}
+                  style={{
+                    padding: '12px 20px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: 'linear-gradient(135deg, #b08a5a 0%, #9a764b 100%)',
+                    color: 'white',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    marginTop: 0,
+                    marginBottom: 0,
+                    display: 'block',
+                    fontSize: '0.95em',
+                    width: '188px',
+                    textAlign: 'center'
+                  }}
+                >
+                  ✏️ Editar contacto
+                </button>
+              )}
             </div>
             <img 
               src="/logo.png" 
@@ -165,119 +192,104 @@ function ContactPage() {
             />
           </div>
 
-          {/* Tarjeta Admin */}
-          {adminRole && (
+          {/* Formulario de Edición - Aparece cuando se activa */}
+          {adminRole && editing && (
             <div style={{ 
               background: 'white',
               borderRadius: '16px',
               padding: '24px',
-              boxShadow: '0 8px 20px rgba(0,0,0,0.08)'
+              boxShadow: '0 8px 20px rgba(0,0,0,0.08)',
+              gridColumn: '1 / -1'
             }}>
-              {!editing ? (
-                <button
-                  onClick={() => setEditing(true)}
-                  style={{
-                    padding: '10px 16px',
-                    borderRadius: '8px',
-                    border: 'none',
-                    background: 'linear-gradient(135deg, #b08a5a 0%, #9a764b 100%)',
-                    color: 'white',
-                    fontWeight: '700',
-                    cursor: 'pointer'
-                  }}
-                >
-                  ✏️ Editar contacto
-                </button>
-              ) : (
-                <div style={{ display: 'grid', gap: '10px' }}>
-                  <input
-                    type="text"
-                    value={contact.name}
-                    onChange={(e) => setContact({ ...contact, name: e.target.value })}
-                    placeholder="Nombre"
-                    style={{ padding: '10px', borderRadius: '8px', border: '1px solid #e1d3bf' }}
-                  />
-                  <input
-                    type="text"
-                    value={contact.address}
-                    onChange={(e) => setContact({ ...contact, address: e.target.value })}
-                    placeholder="Dirección"
-                    style={{ padding: '10px', borderRadius: '8px', border: '1px solid #e1d3bf' }}
-                  />
-                  <input
-                    type="text"
-                    value={contact.city}
-                    onChange={(e) => setContact({ ...contact, city: e.target.value })}
-                    placeholder="Ciudad"
-                    style={{ padding: '10px', borderRadius: '8px', border: '1px solid #e1d3bf' }}
-                  />
-                  <input
-                    type="text"
-                    value={contact.phone}
-                    onChange={(e) => setContact({ ...contact, phone: e.target.value })}
-                    placeholder="Teléfono (recomendable)"
-                    style={{ padding: '10px', borderRadius: '8px', border: '1px solid #e1d3bf' }}
-                  />
-                  <input
-                    type="text"
-                    value={contact.email}
-                    onChange={(e) => setContact({ ...contact, email: e.target.value })}
-                    placeholder="Email"
-                    style={{ padding: '10px', borderRadius: '8px', border: '1px solid #e1d3bf' }}
-                  />
-                  <textarea
-                    value={contact.hours}
-                    onChange={(e) => setContact({ ...contact, hours: e.target.value })}
-                    placeholder="Horario"
-                    rows="3"
-                    style={{ padding: '10px', borderRadius: '8px', border: '1px solid #e1d3bf' }}
-                  />
-                  <input
-                    type="text"
-                    value={contact.whatsapp}
-                    onChange={(e) => setContact({ ...contact, whatsapp: e.target.value })}
-                    placeholder="WhatsApp (solo números)"
-                    style={{ padding: '10px', borderRadius: '8px', border: '1px solid #e1d3bf' }}
-                  />
-                  <input
-                    type="text"
-                    value={contact.mapQuery}
-                    onChange={(e) => setContact({ ...contact, mapQuery: e.target.value })}
-                    placeholder="Ubicación del mapa (dirección o lugar)"
-                    style={{ padding: '10px', borderRadius: '8px', border: '1px solid #e1d3bf' }}
-                  />
-                  <div style={{ display: 'flex', gap: '10px' }}>
-                    <button
-                      onClick={handleSave}
-                      style={{
-                        padding: '10px 16px',
-                        borderRadius: '8px',
-                        border: 'none',
-                        background: 'linear-gradient(135deg, #7a9b76 0%, #6b8f71 100%)',
-                        color: 'white',
-                        fontWeight: '700',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      Guardar
-                    </button>
-                    <button
-                      onClick={() => setEditing(false)}
-                      style={{
-                        padding: '10px 16px',
-                        borderRadius: '8px',
-                        border: '1px solid #d8c7ae',
-                        background: '#f5f2ea',
-                        color: '#5a4a3c',
-                        fontWeight: '700',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      Cancelar
-                    </button>
-                  </div>
+              <h3 style={{ color: '#6b8f71', marginTop: 0 }}>✏️ Editar Contacto</h3>
+              <div style={{ display: 'grid', gap: '10px' }}>
+                <input
+                  type="text"
+                  value={contact.name}
+                  onChange={(e) => setContact({ ...contact, name: e.target.value })}
+                  placeholder="Nombre"
+                  style={{ padding: '10px', borderRadius: '8px', border: '1px solid #e1d3bf' }}
+                />
+                <input
+                  type="text"
+                  value={contact.address}
+                  onChange={(e) => setContact({ ...contact, address: e.target.value })}
+                  placeholder="Dirección"
+                  style={{ padding: '10px', borderRadius: '8px', border: '1px solid #e1d3bf' }}
+                />
+                <input
+                  type="text"
+                  value={contact.city}
+                  onChange={(e) => setContact({ ...contact, city: e.target.value })}
+                  placeholder="Ciudad"
+                  style={{ padding: '10px', borderRadius: '8px', border: '1px solid #e1d3bf' }}
+                />
+                <input
+                  type="text"
+                  value={contact.phone}
+                  onChange={(e) => setContact({ ...contact, phone: e.target.value })}
+                  placeholder="Teléfono (recomendable)"
+                  style={{ padding: '10px', borderRadius: '8px', border: '1px solid #e1d3bf' }}
+                />
+                <input
+                  type="text"
+                  value={contact.email}
+                  onChange={(e) => setContact({ ...contact, email: e.target.value })}
+                  placeholder="Email"
+                  style={{ padding: '10px', borderRadius: '8px', border: '1px solid #e1d3bf' }}
+                />
+                <textarea
+                  value={contact.hours}
+                  onChange={(e) => setContact({ ...contact, hours: e.target.value })}
+                  placeholder="Horario"
+                  rows="3"
+                  style={{ padding: '10px', borderRadius: '8px', border: '1px solid #e1d3bf' }}
+                />
+                <input
+                  type="text"
+                  value={contact.whatsapp}
+                  onChange={(e) => setContact({ ...contact, whatsapp: e.target.value })}
+                  placeholder="WhatsApp (solo números)"
+                  style={{ padding: '10px', borderRadius: '8px', border: '1px solid #e1d3bf' }}
+                />
+                <input
+                  type="text"
+                  value={contact.mapQuery}
+                  onChange={(e) => setContact({ ...contact, mapQuery: e.target.value })}
+                  placeholder="Ubicación del mapa (dirección o lugar)"
+                  style={{ padding: '10px', borderRadius: '8px', border: '1px solid #e1d3bf' }}
+                />
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button
+                    onClick={handleSave}
+                    style={{
+                      padding: '10px 16px',
+                      borderRadius: '8px',
+                      border: 'none',
+                      background: 'linear-gradient(135deg, #7a9b76 0%, #6b8f71 100%)',
+                      color: 'white',
+                      fontWeight: '700',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Guardar
+                  </button>
+                  <button
+                    onClick={() => setEditing(false)}
+                    style={{
+                      padding: '10px 16px',
+                      borderRadius: '8px',
+                      border: '1px solid #d8c7ae',
+                      background: '#f5f2ea',
+                      color: '#5a4a3c',
+                      fontWeight: '700',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Cancelar
+                  </button>
                 </div>
-              )}
+              </div>
             </div>
           )}
 

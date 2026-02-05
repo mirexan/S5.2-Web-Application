@@ -3,6 +3,8 @@ import { getAllProducts } from '../services/productService';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { getLevel } from '../utils/jwtUtils';
+import { showToast } from '../components/Toast';
+import ConfirmModal from '../components/ConfirmModal';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
@@ -13,6 +15,8 @@ function ProductList() {
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [quantities, setQuantities] = useState({});
     const [userLevel, setUserLevel] = useState(0);
+    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+    const [pendingProduct, setPendingProduct] = useState(null);
     const navigate = useNavigate();
     const location = useLocation();
     const { addToCart } = useCart();
@@ -93,16 +97,14 @@ function ProductList() {
     const handleAddToCart = (product) => {
         // Validar stock
         if (!product.stockQuantity || product.stockQuantity <= 0) {
-            alert(`❌ Lo sentimos, "${product.name}" está agotado.`);
+            showToast(`Lo sentimos, "${product.name}" está agotado.`, 'error');
             return;
         }
 
         const token = localStorage.getItem('token');
         if (!token) {
-           const irAlLogin = window.confirm("🔒 Para comprar necesitas identificarte.\n¿Quieres ir a la pantalla de login ahora?");
-            if (irAlLogin) {
-                navigate('/login');
-            }
+            setPendingProduct(product);
+            setIsLoginModalOpen(true);
             return;
         }
         
@@ -110,12 +112,23 @@ function ProductList() {
         for (let i = 0; i < qty; i++) {
             addToCart(product);
         }
-        alert(`✅ ${qty}x ${product.name} añadido al carrito!`);
+        showToast(`${qty}x ${product.name} añadido al carrito!`, 'success');
         // Resetear cantidad a 1
         setQuantities({
             ...quantities,
             [product.id]: 1
         });
+    };
+
+    const handleLoginConfirm = () => {
+        setIsLoginModalOpen(false);
+        setPendingProduct(null);
+        navigate('/login');
+    };
+
+    const handleLoginCancel = () => {
+        setIsLoginModalOpen(false);
+        setPendingProduct(null);
     };
     if (loading) return <div style={{padding: '20px'}}>Loading products... ⏳</div>;
     if (error) return <div style={{padding: '20px', color: 'red'}}>❌ {error}</div>;
@@ -665,6 +678,15 @@ function ProductList() {
                     </div>
                 </div>
             )}
+            <ConfirmModal
+                isOpen={isLoginModalOpen}
+                title="🔒 Autenticación Requerida"
+                message="Para comprar necesitas identificarte. ¿Quieres ir a la pantalla de login ahora?"
+                onConfirm={handleLoginConfirm}
+                onCancel={handleLoginCancel}
+                confirmText="Ir a Login"
+                cancelText="Cancelar"
+            />
         </>
     );
 }

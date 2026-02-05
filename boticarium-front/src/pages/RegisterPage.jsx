@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { registerUser } from '../services/authService';
+import { showToast } from '../components/Toast';
 
 function RegisterPage() {
     const [username, setUsername] = useState('');
@@ -23,7 +24,7 @@ function RegisterPage() {
             localStorage.setItem('token', token);
 
             window.dispatchEvent(new Event("storage"));
-            alert("¡Cuenta creada! Bienvenida " + username + "");
+            showToast(`¡Cuenta creada! Bienvenido ${username}`, 'success');
             navigate('/products');
             window.location.reload();
         } catch (err) {

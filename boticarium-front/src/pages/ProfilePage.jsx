@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getUsername } from '../utils/jwtUtils';
+import { cleanErrorMessage } from '../utils/errorUtils';
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
@@ -90,7 +91,7 @@ function ProfilePage() {
       setSuccess('✅ Perfil actualizado correctamente');
       setEditing(false);
     } catch (err) {
-      setError(`❌ Error: ${err.response?.data?.message || err.message}`);
+      setError(`❌ Error: ${cleanErrorMessage(err.response?.data?.message || err.message)}`);
     }
   };
 
@@ -103,7 +104,7 @@ function ProfilePage() {
       localStorage.removeItem('token');
       navigate('/login');
     } catch (err) {
-      setError(`❌ Error al eliminar cuenta: ${err.message}`);
+      setError(`❌ Error al eliminar cuenta: ${cleanErrorMessage(err.message)}`);
     }
   };
 
