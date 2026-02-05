@@ -196,7 +196,7 @@ function AboutPage() {
               <span style={{ color: colors.goldAccent, textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '700', marginRight: '10px' }}>
                 Comunicado
               </span>
-              Herbologie evoluciona. <strong>Boticarium</strong> es el nuevo nombre de nuestra esencia.
+              Herbologie evoluciona. <strong>Boticarium</strong> es el nuevo nombre de nuestra casa.
             </div>
           </div>
 

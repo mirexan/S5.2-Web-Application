@@ -5,7 +5,10 @@ import com.boticarium.backend.domain.model.StockStatus;
 import com.boticarium.backend.domain.model.User;
 import com.boticarium.backend.infrastructure.outbound.persistence.ProductRepository;
 import com.boticarium.backend.infrastructure.outbound.persistence.UserRepository;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -19,33 +22,44 @@ public class DataSeeder implements CommandLineRunner {
 	private final UserRepository userRepository;
 	private final ProductRepository productRepository;
 	private final PasswordEncoder passwordEncoder;
+	@Value("${DB_PASSWORD:admin}")
+	private String dbPassword;
 
 	@Override
 	public void run(String... args) throws Exception {
-		if (productRepository.count() == 0) {
+		boolean shouldSeedProducts = productRepository.count() == 0;
+		boolean shouldSeedUsers = userRepository.count() == 0
+				|| userRepository.findByEmail("mmregada@gmail.com").isEmpty()
+				|| userRepository.findByEmail("Mirexan@test.com").isEmpty();
+
+		if (shouldSeedUsers) {
 			loadUsers();
+		}
+		if (shouldSeedProducts) {
 			loadProducts();
+		}
+		if (shouldSeedUsers || shouldSeedProducts) {
 			System.out.println("\uD83C\uDF31 Test data uploaded correctly \uD83C\uDF31");
 		}
 	}
 
 	private void loadUsers() {
-		if (userRepository.findByUsername("admin").isEmpty()) {
+		if (userRepository.count() == 0 || userRepository.findByEmail("mmregada@gmail.com").isEmpty()) {
 			User admin = User.builder()
 					.username("admin")
-					.email("admin@boticarium.com")
-					.password(passwordEncoder.encode("klonoa"))
+					.email("mmregada@gmail.com")
+					.password(passwordEncoder.encode(dbPassword))
 					.phone("+34600000000")
 					.role(Role.ADMIN)
 					.points(1000)
 					.build();
 			userRepository.save(admin);
 		}
-		if (userRepository.findByUsername("Mirexan").isEmpty()) {
+		if (userRepository.count() == 0 || userRepository.findByEmail("Mirexan@test.com").isEmpty()) {
 			User user = User.builder()
 					.username("Mirexan")
 					.email("Mirexan@test.com")
-					.password(passwordEncoder.encode("klonoa"))
+					.password(passwordEncoder.encode("mirexan"))
 					.phone("+34611223344")
 					.role(Role.USER)
 					.points(300)
