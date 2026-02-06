@@ -54,16 +54,21 @@ public class AuthenticationService {
 	}
 
 	public AuthResponse login(LoginRequest request){
-		authenticationManager.authenticate(
-				new UsernamePasswordAuthenticationToken(
-						request.username(),
-						request.password()
-				)
-		);
-		User user = userRepository.findByUsername(request.username())
-				.orElseThrow();
-		String jwtToken = jwtService.generateToken(user);
-		return new AuthResponse(jwtToken);
+		try {
+			authenticationManager.authenticate(
+					new UsernamePasswordAuthenticationToken(
+							request.username(),
+							request.password()
+					)
+			);
+			User user = userRepository.findByUsername(request.username())
+					.orElseThrow();
+			String jwtToken = jwtService.generateToken(user);
+			return new AuthResponse(jwtToken);
+		} catch (Exception ex) {
+			log.warn("Login fallido para username={}", request.username());
+			throw ex;
+		}
 	}
 
 	/**

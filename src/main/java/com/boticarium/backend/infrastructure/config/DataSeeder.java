@@ -7,6 +7,7 @@ import com.boticarium.backend.infrastructure.outbound.persistence.ProductReposit
 import com.boticarium.backend.infrastructure.outbound.persistence.UserRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -18,6 +19,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class DataSeeder implements CommandLineRunner {
 	private final UserRepository userRepository;
 	private final ProductRepository productRepository;
@@ -48,6 +50,7 @@ public class DataSeeder implements CommandLineRunner {
 				.ifPresentOrElse(existingAdmin -> {
 					existingAdmin.setPassword(passwordEncoder.encode(adminPassword));
 					userRepository.save(existingAdmin);
+					log.info("Admin actualizado: email={} (password reset por ADMIN_PASSWORD)", existingAdmin.getEmail());
 				}, () -> {
 					User admin = User.builder()
 							.username("admin")
@@ -58,6 +61,7 @@ public class DataSeeder implements CommandLineRunner {
 							.points(1000)
 							.build();
 					userRepository.save(admin);
+					log.info("Admin creado: email={} (password desde ADMIN_PASSWORD)", admin.getEmail());
 				});
 		if (userRepository.count() == 0 || userRepository.findByEmail("Mirexan@test.com").isEmpty()) {
 			User user = User.builder()
@@ -80,8 +84,6 @@ public class DataSeeder implements CommandLineRunner {
 				.costPrice(new BigDecimal("10.00"))
 				.stockQuantity(100)
 				.stockStatus(StockStatus.AVAILABLE)
-				.imgUrl("/images/divasel.jpg")
-				// .imgUrl("https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=400")
 				.build();
 
 
@@ -95,8 +97,6 @@ public class DataSeeder implements CommandLineRunner {
 				.discountLevel3(10)
 				.stockQuantity(2)
 				.stockStatus(StockStatus.AVAILABLE)
-				.imgUrl("/images/baba-chufi.jpg")
-				// .imgUrl("https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400")
 				.build();
 
 		productRepository.saveAll(List.of(p1, p2));
