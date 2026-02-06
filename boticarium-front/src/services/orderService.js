@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
 /**
  * Realiza el checkout: convierte el carrito en una orden
@@ -19,7 +19,7 @@ export const checkout = async (items) => {
       }))
     };
 
-    const response = await axios.post(`${API_URL}/orders`, orderData, {
+    const response = await axios.post(`${API_BASE_URL}/orders`, orderData, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'

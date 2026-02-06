@@ -12,7 +12,7 @@ function SubNavbar() {
 
     return (
         <nav style={{
-            background: 'linear-gradient(90deg, #efe2cf 0%, #f5eadb 25%, #e7d3b6 50%, #f5eadb 75%, #efe2cf 100%)',
+            background: 'linear-gradient(90deg, #f7efe5 0%, #fbf4ea 25%, #f1e3d2 50%, #fbf4ea 75%, #f7efe5 100%)',
             borderTop: '3px solid #c9a968',
             borderBottom: '1px solid #e1d3bf',
             boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6), 0 2px 8px rgba(0,0,0,0.06)',

@@ -23,7 +23,7 @@ function Navbar() {
             justifyContent: 'space-between',
             alignItems: 'center',
             padding: '14px 24px',
-            backgroundImage: 'linear-gradient(90deg, #efe2cf 0%, #f5eadb 25%, #e7d3b6 50%, #f5eadb 75%, #efe2cf 100%), linear-gradient(180deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 100%)',
+            backgroundImage: 'linear-gradient(90deg, #d9c4aa 0%, #f5eadb 22%, #c7ad8f 50%, #f5eadb 78%, #d9c4aa 100%), linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 100%)',
             backgroundSize: '120% 100%, 100% 100%',
             boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
             color: '#3e2c1e',
