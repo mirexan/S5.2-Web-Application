@@ -22,8 +22,8 @@ public class DataSeeder implements CommandLineRunner {
 	private final UserRepository userRepository;
 	private final ProductRepository productRepository;
 	private final PasswordEncoder passwordEncoder;
-	@Value("${DB_PASSWORD:admin}")
-	private String dbPassword;
+	@Value("${ADMIN_PASSWORD}")
+	private String adminPassword;
 
 	@Override
 	public void run(String... args) throws Exception {
@@ -44,17 +44,21 @@ public class DataSeeder implements CommandLineRunner {
 	}
 
 	private void loadUsers() {
-		if (userRepository.count() == 0 || userRepository.findByEmail("mmregada@gmail.com").isEmpty()) {
-			User admin = User.builder()
-					.username("admin")
-					.email("mmregada@gmail.com")
-					.password(passwordEncoder.encode(dbPassword))
-					.phone("+34600000000")
-					.role(Role.ADMIN)
-					.points(1000)
-					.build();
-			userRepository.save(admin);
-		}
+		userRepository.findByEmail("mmregada@gmail.com")
+				.ifPresentOrElse(existingAdmin -> {
+					existingAdmin.setPassword(passwordEncoder.encode(adminPassword));
+					userRepository.save(existingAdmin);
+				}, () -> {
+					User admin = User.builder()
+							.username("admin")
+							.email("mmregada@gmail.com")
+							.password(passwordEncoder.encode(adminPassword))
+							.phone("+34600000000")
+							.role(Role.ADMIN)
+							.points(1000)
+							.build();
+					userRepository.save(admin);
+				});
 		if (userRepository.count() == 0 || userRepository.findByEmail("Mirexan@test.com").isEmpty()) {
 			User user = User.builder()
 					.username("Mirexan")
