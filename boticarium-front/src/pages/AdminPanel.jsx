@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { isAdmin } from '../utils/jwtUtils';
-import { getAllProducts } from '../services/productService';
+import { getAllProducts, getAllProductsAdmin } from '../services/productService';
 import ImageGalleryModal from '../components/ImageGalleryModal';
 import { cleanErrorMessage } from '../utils/errorUtils';
 import axios from 'axios';
@@ -88,10 +88,10 @@ function AdminPanel() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const data = await getAllProducts();
+      const data = await getAllProductsAdmin();
       setProducts(data);
     } catch (err) {
-      setError('Error cargando productos');
+      setError('Error cargando productos (admin)');
       console.error(err);
     } finally {
       setLoading(false);
@@ -100,11 +100,27 @@ function AdminPanel() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    const shouldParseNumber = name.includes('Quantity') || name.includes('Level');
+    const isPriceField = name.includes('Price');
+
     setFormData(prev => ({
       ...prev,
-      [name]: name.includes('Quantity') || name.includes('Level') || name.includes('Price') 
+      [name]: shouldParseNumber
         ? (value === '' ? '' : parseFloat(value))
-        : value
+        : isPriceField
+          ? value
+          : value
+    }));
+  };
+
+  const handlePriceBlur = (e) => {
+    const { name, value } = e.target;
+    if (value === '') return;
+    const numeric = Number(value);
+    if (Number.isNaN(numeric)) return;
+    setFormData(prev => ({
+      ...prev,
+      [name]: numeric.toFixed(2)
     }));
   };
 
@@ -156,14 +172,14 @@ function AdminPanel() {
       name: product.name,
       description: product.description,
       basePrice: product.basePrice,
-      costPrice: product.costPrice || '',
-      discountLevel1: product.discountLevel1 || 0,
-      discountLevel2: product.discountLevel2 || 0,
-      discountLevel3: product.discountLevel3 || 0,
-      stockQuantity: product.stockQuantity || '',
-      imgUrl: product.imgUrl || '',
-      ingredients: product.ingredients || '',
-      usageInstructions: product.usageInstructions || ''
+      costPrice: product.costPrice ?? '',
+      discountLevel1: product.discountLevel1 ?? 0,
+      discountLevel2: product.discountLevel2 ?? 0,
+      discountLevel3: product.discountLevel3 ?? 0,
+      stockQuantity: product.stockQuantity ?? '',
+      imgUrl: product.imgUrl ?? '',
+      ingredients: product.ingredients ?? '',
+      usageInstructions: product.usageInstructions ?? ''
     });
     // Scroll to top after state update
     setTimeout(() => {
@@ -437,6 +453,7 @@ function AdminPanel() {
                     placeholder="Ej: 15.50 (para calcular el margen de beneficio)"
                     value={formData.costPrice}
                     onChange={handleInputChange}
+                    onBlur={handlePriceBlur}
                     step="0.01"
                     style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '5px', width: '100%' }}
                   />
@@ -469,7 +486,7 @@ function AdminPanel() {
                     <div>
                       <span style={{ color: '#666', fontSize: '0.85em' }}>Margen de Beneficio:</span>
                       <p style={{ margin: '5px 0', fontWeight: 'bold', color: '#28a745', fontSize: '1.15em' }}>
-                        {((formData.basePrice - formData.costPrice) / formData.costPrice * 100).toFixed(1)}%
+                        {((formData.basePrice - formData.costPrice) / formData.basePrice * 100).toFixed(1)}%
                       </p>
                     </div>
                   </div>

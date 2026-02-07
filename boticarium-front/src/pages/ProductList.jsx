@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { getAllProducts } from '../services/productService';
+import { getAllProducts, getAllProductsAdmin } from '../services/productService';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { getLevel } from '../utils/jwtUtils';
+import { getLevel, isAdmin } from '../utils/jwtUtils';
 import { showToast } from '../components/Toast';
 import ConfirmModal from '../components/ConfirmModal';
 
@@ -20,6 +20,7 @@ function ProductList() {
     const navigate = useNavigate();
     const location = useLocation();
     const { addToCart } = useCart();
+    const isAdminUser = isAdmin();
 
     useEffect(() => {
         const level = getLevel();
@@ -29,6 +30,11 @@ function ProductList() {
 
     const getPriceWithDiscount = (basePrice, discount) => {
         return basePrice * (1 - discount / 100);
+    };
+
+    const formatCurrency = (value) => {
+        if (value === null || value === undefined || Number.isNaN(Number(value))) return '—';
+        return `€${Number(value).toFixed(2)}`;
     };
 
     const getDiscountForLevel = (product) => {
@@ -60,7 +66,17 @@ function ProductList() {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const data = await getAllProducts();
+                let data = [];
+                if (isAdminUser) {
+                    try {
+                        data = await getAllProductsAdmin();
+                    } catch (adminError) {
+                        console.warn('Fallo al cargar productos admin, usando vista publica.', adminError);
+                        data = await getAllProducts();
+                    }
+                } else {
+                    data = await getAllProducts();
+                }
                 setProducts(data);
                 // Inicializar cantidades a 1 para cada producto
                 const initialQuantities = {};
@@ -78,7 +94,7 @@ function ProductList() {
             }
         };
         fetchProducts();
-    }, [location]);
+    }, [location, isAdminUser]);
 
     const handleQuantityChange = (productId, change) => {
         const product = products.find(p => p.id === productId);
@@ -283,7 +299,18 @@ function ProductList() {
                                     <h3 style={{ margin: '0 0 6px 0', fontSize: '1.1em', fontWeight: '600', color: '#333' }}>
                                         {product.name}
                                     </h3>
-                                    <p style={{ color: '#888', fontSize: '0.85em', flexGrow: 1, margin: '6px 0', lineHeight: '1.4' }}>
+                                    <p style={{
+                                        color: '#888',
+                                        fontSize: '0.85em',
+                                        flexGrow: 1,
+                                        margin: '6px 0',
+                                        lineHeight: '1.4',
+                                        display: '-webkit-box',
+                                        WebkitLineClamp: 2,
+                                        WebkitBoxOrient: 'vertical',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis'
+                                    }}>
                                         {product.description}
                                     </p>
                                     
@@ -531,6 +558,41 @@ function ProductList() {
                                     {selectedProduct.stockQuantity > 0 ? `📦 ${selectedProduct.stockQuantity} disponibles` : '❌ Sin stock'}
                                 </span>
                             </div>
+
+                            {isAdminUser && (
+                                <div style={{ marginBottom: '25px', padding: '18px', background: '#f9f5ee', borderRadius: '12px', border: '1px solid #eadcc9' }}>
+                                    <h3 style={{ marginTop: 0, fontSize: '1.05em', fontWeight: '700', color: '#8c6a3f', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                                        Detalle admin
+                                    </h3>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
+                                        <div>
+                                            <div style={{ fontSize: '0.85em', color: '#8a7a67', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Precio coste</div>
+                                            <div style={{ fontWeight: '700', color: '#5a4a3c' }}>{formatCurrency(selectedProduct.costPrice)}</div>
+                                        </div>
+                                        <div>
+                                            <div style={{ fontSize: '0.85em', color: '#8a7a67', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Margen</div>
+                                            <div style={{ fontSize: '1.2em', fontWeight: '700', color: '#5a4a3c' }}>
+                                                {(() => {
+                                                    const base = Number(selectedProduct.basePrice);
+                                                    const cost = Number(selectedProduct.costPrice);
+                                                    if (!base || Number.isNaN(base) || Number.isNaN(cost)) return '—';
+                                                    const pct = ((base - cost) / base) * 100;
+                                                    return `${pct.toFixed(2)}%`;
+                                                })()}
+                                            </div>
+                                            <div style={{ fontSize: '0.85em', color: '#8a7a67' }}>
+                                                {formatCurrency(Number(selectedProduct.basePrice) - Number(selectedProduct.costPrice))}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div style={{ fontSize: '0.85em', color: '#8a7a67', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Descuentos</div>
+                                            <div style={{ fontWeight: '700', color: '#5a4a3c' }}>
+                                                Nv1 {selectedProduct.discountLevel1 ?? 0}% · Nv2 {selectedProduct.discountLevel2 ?? 0}% · Nv3 {selectedProduct.discountLevel3 ?? 0}%
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Descripción */}
                             <div style={{ marginBottom: '25px' }}>

@@ -12,3 +12,16 @@ export const getAllProducts = async () => {
         throw error;
     }
 };
+
+export const getAllProductsAdmin = async () => {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`${API_URL}/management`, {
+            headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching admin products:', error);
+        throw error;
+    }
+};
