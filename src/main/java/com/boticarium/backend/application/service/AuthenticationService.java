@@ -6,6 +6,8 @@ import com.boticarium.backend.application.dto.auth.LoginRequest;
 import com.boticarium.backend.application.dto.user.RegisterRequest;
 import com.boticarium.backend.domain.model.Role;
 import com.boticarium.backend.domain.model.User;
+import com.boticarium.backend.infrastructure.security.GoogleOAuthService;
+import com.boticarium.backend.infrastructure.security.JwtService;
 import com.boticarium.backend.infrastructure.outbound.persistence.UserRepository;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import lombok.RequiredArgsConstructor;
@@ -71,38 +73,28 @@ public class AuthenticationService {
 		}
 	}
 
-	/**
-	 * Login/Registro automático con Google OAuth
-	 * Si el usuario no existe, lo crea automáticamente
-	 * Si existe, lo autentica
-	 * 
-	 * @param request Con el token de Google
-	 * @return AuthResponse con nuestro JWT
-	 * @throws Exception Si el token de Google es inválido
-	 */
+
 	public AuthResponse loginWithGoogle(GoogleLoginRequest request) throws Exception {
-		// Verificar el token de Google
+		
 		GoogleIdToken.Payload payload = googleOAuthService.verifyGoogleToken(request.getToken());
 		
 		String email = payload.getEmail();
 		String username = (String) payload.get("name");
 		
-		// Si el usuario no existe, crearlo automáticamente
 		if (userRepository.findByEmail(email).isEmpty()) {
-			log.info("Creando usuario nuevo desde Google: {}", email);
+			log.info("Creating new user from google: {}", email);
 			User newUser = User.builder()
 					.username(username != null ? username : email.split("@")[0])
 					.email(email)
-					.password(passwordEncoder.encode("google-oauth-user"))  // No usa contraseña
+					.password(passwordEncoder.encode("google-oauth-user"))
 					.role(Role.USER)
-					.points(0) // Puntos iniciales
+					.points(0)
 					.build();
 			userRepository.save(newUser);
 		}
 		
-		// Obtener usuario (nuevo o existente) y generar token
 		User user = userRepository.findByEmail(email)
-				.orElseThrow(() -> new Exception("No se pudo obtener el usuario de Google"));
+				.orElseThrow(() -> new Exception("Google user not found"));
 		
 		String jwtToken = jwtService.generateToken(user);
 		return new AuthResponse(jwtToken);

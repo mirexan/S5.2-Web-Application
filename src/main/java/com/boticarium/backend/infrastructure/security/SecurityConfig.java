@@ -1,4 +1,4 @@
-package com.boticarium.backend.infrastructure.config;
+package com.boticarium.backend.infrastructure.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,10 +11,6 @@ import org.springframework.security.config.annotation.web.configurers.AuthorizeH
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
-import com.boticarium.backend.infrastructure.config.JwtAuthenticationFilter;
-import com.boticarium.backend.infrastructure.security.CustomAccessDeniedHandler;
-import com.boticarium.backend.infrastructure.security.CustomAuthenticationEntryPoint;
 
 @Configuration
 @EnableWebSecurity

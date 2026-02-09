@@ -1,4 +1,4 @@
-package com.boticarium.backend.infrastructure.config;
+package com.boticarium.backend.infrastructure.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

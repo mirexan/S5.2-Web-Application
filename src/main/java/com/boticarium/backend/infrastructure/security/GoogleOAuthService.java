@@ -1,4 +1,4 @@
-package com.boticarium.backend.application.service;
+package com.boticarium.backend.infrastructure.security;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
@@ -35,7 +35,6 @@ public class GoogleOAuthService {
             JsonFactory jsonFactory = new GsonFactory();
 
             GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
-                    // 2. USAMOS LA VERSIÓN LIMPIA AQUÍ
                     .setAudience(Collections.singletonList(cleanClientId))
                     .setAcceptableTimeSkewSeconds(300) 
                     .build();
@@ -47,7 +46,6 @@ public class GoogleOAuthService {
                 log.info("✅ Valid token. User: {}", payload.getEmail());
                 return payload;
             } else {
-                // Depuración de errores
                 try {
                     GoogleIdToken debugToken = GoogleIdToken.parse(jsonFactory, tokenString);
                     String tokenAudience = debugToken.getPayload().getAudience().toString(); // Convertimos a String por si acaso
@@ -56,7 +54,6 @@ public class GoogleOAuthService {
                     log.error("   -> Token has: '{}'", tokenAudience);
                     log.error("   -> Java has: '{}'", cleanClientId);
                     
-                    // Comprobación manual ignorando espacios
                     if (tokenAudience.trim().equals(cleanClientId)) {
                          log.warn("⚠️ WARNING! IDs match if we remove spaces. The problem was the invisible space.");
                     }

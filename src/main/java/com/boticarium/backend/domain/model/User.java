@@ -44,12 +44,7 @@ public class User implements UserDetails {
 	@Builder.Default
 	private LocalDateTime createdAt = LocalDateTime.now();
 	
-	/**
-	 * Calcula el nivel del usuario basado en sus puntos:
-	 * - Nivel 1: 0-199 puntos
-	 * - Nivel 2: 200-499 puntos
-	 * - Nivel 3: 500+ puntos
-	 */
+
 	public int getLevel(){
 		if(this.points >= 500){
 			return 3;

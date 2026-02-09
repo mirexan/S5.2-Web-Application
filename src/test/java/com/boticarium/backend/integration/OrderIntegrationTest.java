@@ -58,7 +58,7 @@ public class OrderIntegrationTest {
 		testUser = User.builder()
 				.username("testclient")
 				.email("test@client.com")
-				.password("password123") // No importa mucho en el test mockeado
+				.password("password123")
 				.role(Role.USER)
 				.points(0)
 				.build();
@@ -93,6 +93,6 @@ public class OrderIntegrationTest {
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(orderRequest)))
 
-				.andExpect(status().isUnauthorized()); // O isUnauthorized()
+				.andExpect(status().isUnauthorized());
 	}
 }

@@ -1,6 +1,5 @@
-package com.boticarium.backend.infrastructure.config;
+package com.boticarium.backend.infrastructure.security;
 
-import com.boticarium.backend.application.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

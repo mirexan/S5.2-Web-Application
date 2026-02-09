@@ -1,4 +1,4 @@
-package com.boticarium.backend.application.service;
+package com.boticarium.backend.infrastructure.security;
 
 import com.boticarium.backend.domain.model.User;
 import io.jsonwebtoken.Claims;
@@ -24,11 +24,7 @@ public class JwtService {
 		return extractClaim(token, Claims::getSubject);
 	}
 
-	/**
-	 * Genera token JWT incluyendo role, points y level del usuario
-	 * @param user Usuario con rol, puntos y nivel
-	 * @return Token JWT con claims de role, points y level
-	 */
+
 	public String generateToken(User user) {
 		return Jwts.builder()
 				.setSubject(user.getUsername())

@@ -16,10 +16,7 @@ import java.time.LocalDateTime;
 public class SchedulingConfig {
     private final OrderRepository orderRepository;
 
-    /**
-     * Elimina órdenes más antiguas de 1 año (365 días)
-     * Se ejecuta diariamente a las 2:00 AM
-     */
+
     @Scheduled(cron = "0 0 2 * * *")
     public void deleteOldOrders() {
         try {

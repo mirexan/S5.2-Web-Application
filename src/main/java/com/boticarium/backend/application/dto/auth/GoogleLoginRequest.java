@@ -4,9 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * DTO para recibir el token de Google desde el frontend
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

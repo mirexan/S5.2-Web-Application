@@ -11,6 +11,6 @@ public record RegisterRequest(
 		@NotBlank(message = "password is mandatory")
 		@Size(min = 6, message = "It must contain at least 6 characters")
 		String password,
-		String phone // Opcional - puede ser null
+		String phone
 ) {
 }
