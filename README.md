@@ -8,7 +8,7 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue)
 ![React](https://img.shields.io/badge/React-18-61dafb)
 ![Docker](https://img.shields.io/badge/Docker-✓-2496ED)
-![Production](https://img.shields.io/badge/Production-Ready-success)
+
 
 
 
