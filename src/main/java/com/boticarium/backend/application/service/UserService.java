@@ -14,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -23,7 +24,7 @@ public class UserService {
 	private final UserRepository userRepository;
 
 	public List<UserResponse> getAllUsers() {
-		return userRepository.findAll()
+		return userRepository.findAllByDeletedFalse()
 				.stream()
 				.map(this::mapToUserResponse)
 				.toList();
@@ -44,7 +45,9 @@ public class UserService {
 		log.warn("User {} ({}) eliminated user {} ({})",
 				actualUser.getUsername(), actualUser.getRole(),
 				userId, targetUser.getRole());
-		userRepository.delete(targetUser);
+		targetUser.setDeleted(true);
+		targetUser.setDeletedAt(LocalDateTime.now());
+		userRepository.save(targetUser);
 	}
 
 	public UserResponse getUserProfile(User user) {
@@ -65,7 +68,9 @@ public class UserService {
 			ensureNotLastAdmin();
 		}
 		log.warn("User {} ({}) deleted their own account", user.getUsername(), user.getRole());
-		userRepository.delete(user);
+		user.setDeleted(true);
+		user.setDeletedAt(LocalDateTime.now());
+		userRepository.save(user);
 	}
 
 	private void validateDeletionPermission(User requester, User target){
@@ -79,14 +84,14 @@ public class UserService {
 	}
 
 	private void ensureNotLastAdmin(){
-		long totalAdmins = userRepository.countByRole(Role.ADMIN);
+		long totalAdmins = userRepository.countByRoleAndDeletedFalse(Role.ADMIN);
 		if (totalAdmins <= 1) {
 			throw new IllegalStateException("Operation denied: There is only one admin in database");
 		}
 	}
 
 	private User findUserOrThrow(Long id) {
-		return userRepository.findById(id)
+		return userRepository.findById(id).filter(user -> !user.isDeleted())
 				.orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
 	}
 	private UserResponse mapToUserResponse(User user) {

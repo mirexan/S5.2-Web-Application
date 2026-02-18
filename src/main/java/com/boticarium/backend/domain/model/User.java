@@ -40,7 +40,7 @@ public class User implements UserDetails {
 	@Builder.Default
 	private Integer points = 0;
 
-	@Colum(nullable = false)
+	@Column(nullable = false)
 	@Builder.Default
 	private boolean deleted = false;
 	
@@ -48,7 +48,9 @@ public class User implements UserDetails {
 	@Builder.Default
 	private LocalDateTime createdAt = LocalDateTime.now();
 
-	
+	@Column(name = "deleted_at")
+	private LocalDateTime deletedAt;
+
 
 	public int getLevel(){
 		if(this.points >= 500){

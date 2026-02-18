@@ -63,7 +63,7 @@ public class AuthenticationService {
 							request.password()
 					)
 			);
-			User user = userRepository.findByUsername(request.username())
+			User user = userRepository.findByUsernameAndDeletedFalse(request.username())
 					.orElseThrow();
 			String jwtToken = jwtService.generateToken(user);
 			return new AuthResponse(jwtToken);
@@ -81,21 +81,24 @@ public class AuthenticationService {
 		String email = payload.getEmail();
 		String username = (String) payload.get("name");
 		
-		if (userRepository.findByEmail(email).isEmpty()) {
-			log.info("Creating new user from google: {}", email);
-			User newUser = User.builder()
-					.username(username != null ? username : email.split("@")[0])
-					.email(email)
-					.password(passwordEncoder.encode("google-oauth-user"))
-					.role(Role.USER)
-					.points(0)
-					.build();
-			userRepository.save(newUser);
-		}
-		
-		User user = userRepository.findByEmail(email)
-				.orElseThrow(() -> new Exception("Google user not found"));
-		
+		  User user = userRepository.findByEmailAndDeletedFalse(email)
+            .orElseGet(() -> {
+                User existing = userRepository.findByEmail(email).orElse(null);
+                if (existing != null && existing.isDeleted()) {
+                    throw new IllegalStateException("This account has been deleted");
+                }
+
+                log.info("Creating new user from google: {}", email);
+                User newUser = User.builder()
+                        .username(username != null ? username : email.split("@")[0])
+                        .email(email)
+                        .password(passwordEncoder.encode("google-oauth-user"))
+                        .role(Role.USER)
+                        .points(0)
+                        .build();
+                return userRepository.save(newUser);
+            });
+
 		String jwtToken = jwtService.generateToken(user);
 		return new AuthResponse(jwtToken);
 	}

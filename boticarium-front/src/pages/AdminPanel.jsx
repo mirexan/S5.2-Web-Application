@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { isAdmin } from '../utils/jwtUtils';
+import { isAdmin, isTokenExpired } from '../utils/jwtUtils';
 import { getAllProducts, getAllProductsAdmin } from '../services/productService';
 import ImageGalleryModal from '../components/ImageGalleryModal';
+import ConfirmModal from '../components/ConfirmModal';
 import { cleanErrorMessage } from '../utils/errorUtils';
 import axios from 'axios';
+import { showToast } from '../components/Toast';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
@@ -38,6 +40,10 @@ function AdminPanel() {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [showImageGallery, setShowImageGallery] = useState(false);
+  const [isDeleteProductModalOpen, setIsDeleteProductModalOpen] = useState(false);
+  const [pendingProductDeleteId, setPendingProductDeleteId] = useState(null);
+  const [isDeleteUserModalOpen, setIsDeleteUserModalOpen] = useState(false);
+  const [pendingUserDeleteId, setPendingUserDeleteId] = useState(null);
   const formRef = useRef(null);
 
   // Verificar si es admin
@@ -50,6 +56,25 @@ function AdminPanel() {
     fetchOrders(0);
     fetchUsers();
   }, [navigate]);
+
+  const handleAuthError = (err) => {
+    const status = err?.response?.status;
+    if (status === 401) {
+      const expired = isTokenExpired();
+      localStorage.removeItem('token');
+      showToast(
+        expired ? 'Sesion expirada. Vuelve a iniciar sesion.' : 'No autenticado. Inicia sesion.',
+        'error'
+      );
+      navigate('/login');
+      return true;
+    }
+    if (status === 403) {
+      showToast('No tienes permisos para esta accion.', 'error');
+      return true;
+    }
+    return false;
+  };
 
   const fetchOrders = async (page = 0) => {
     try {
@@ -69,6 +94,8 @@ function AdminPanel() {
       }
       setCurrentOrderPage(page);
     } catch (err) {
+      if (handleAuthError(err)) return;
+      showToast('Error cargando pedidos', 'error');
       console.error('Error cargando pedidos:', err);
     }
   };
@@ -81,6 +108,8 @@ function AdminPanel() {
       });
       setUsers(response.data);
     } catch (err) {
+      if (handleAuthError(err)) return;
+      showToast('Error cargando usuarios', 'error');
       console.error('Error cargando usuarios:', err);
     }
   };
@@ -91,6 +120,8 @@ function AdminPanel() {
       const data = await getAllProductsAdmin();
       setProducts(data);
     } catch (err) {
+      if (handleAuthError(err)) return;
+      showToast('Error cargando productos (admin)', 'error');
       setError('Error cargando productos (admin)');
       console.error(err);
     } finally {
@@ -236,34 +267,58 @@ function AdminPanel() {
     setShowImageGallery(false);
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('¿Estás seguro de que quieres eliminar este producto?')) return;
-
+  const confirmDeleteProduct = async () => {
+    if (!pendingProductDeleteId) return;
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`${API_URL}/products/${id}`, {
+      await axios.delete(`${API_URL}/products/${pendingProductDeleteId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      setSuccess('✅ Producto eliminado correctamente');
+      showToast('Producto eliminado correctamente', 'success');
+      setIsDeleteProductModalOpen(false);
+      setPendingProductDeleteId(null);
       fetchProducts();
     } catch (err) {
-      setError(`❌ Error al eliminar: ${cleanErrorMessage(err.message)}`);
+      if (handleAuthError(err)) return;
+      showToast(`Error al eliminar producto: ${cleanErrorMessage(err.response?.data?.message || err.message)}`, 'error');
     }
   };
 
-  const handleDeleteUser = async (id) => {
-    if (!window.confirm('¿Estás seguro de que quieres eliminar este usuario? Esta acción es irreversible.')) return;
+  const handleDelete = (id) => {
+    setPendingProductDeleteId(id);
+    setIsDeleteProductModalOpen(true);
+  };
 
+  const cancelDeleteProduct = () => {
+    setIsDeleteProductModalOpen(false);
+    setPendingProductDeleteId(null);
+  };
+
+  const confirmDeleteUser = async () => {
+    if (!pendingUserDeleteId) return;
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`${API_URL}/users/${id}`, {
+      await axios.delete(`${API_URL}/users/${pendingUserDeleteId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      setSuccess('✅ Usuario eliminado correctamente');
+      showToast('Usuario eliminado correctamente', 'success');
+      setIsDeleteUserModalOpen(false);
+      setPendingUserDeleteId(null);
       fetchUsers();
     } catch (err) {
-      setError(`❌ Error al eliminar usuario: ${cleanErrorMessage(err.message)}`);
+      if (handleAuthError(err)) return;
+      showToast(`Error al eliminar usuario: ${cleanErrorMessage(err.response?.data?.message || err.message)}`, 'error');
     }
+  };
+
+  const handleDeleteUser = (id) => {
+    setPendingUserDeleteId(id);
+    setIsDeleteUserModalOpen(true);
+  };
+
+  const cancelDeleteUser = () => {
+    setIsDeleteUserModalOpen(false);
+    setPendingUserDeleteId(null);
   };
 
   const handleUpdateOrderStatus = async (orderId, newStatus) => {
@@ -991,6 +1046,24 @@ function AdminPanel() {
         isOpen={showImageGallery}
         onClose={() => setShowImageGallery(false)}
         onSelectImage={handleSelectImageFromGallery}
+      />
+      <ConfirmModal
+        isOpen={isDeleteProductModalOpen}
+        title="⚠️ Confirmar eliminacion"
+        message="¿Estas seguro de que quieres eliminar este producto? Esta accion no se puede deshacer."
+        onConfirm={confirmDeleteProduct}
+        onCancel={cancelDeleteProduct}
+        confirmText="Eliminar producto"
+        cancelText="Cancelar"
+      />
+      <ConfirmModal
+        isOpen={isDeleteUserModalOpen}
+        title="⚠️ Confirmar eliminacion"
+        message="¿Estas seguro de que quieres eliminar este usuario? Esta accion es irreversible."
+        onConfirm={confirmDeleteUser}
+        onCancel={cancelDeleteUser}
+        confirmText="Eliminar usuario"
+        cancelText="Cancelar"
       />
     </div>
   );
