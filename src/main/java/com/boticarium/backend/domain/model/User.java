@@ -40,9 +40,14 @@ public class User implements UserDetails {
 	@Builder.Default
 	private Integer points = 0;
 
+	@Colum(nullable = false)
+	@Builder.Default
+	private boolean deleted = false;
+	
 	@Column(nullable = false, updatable = false)
 	@Builder.Default
 	private LocalDateTime createdAt = LocalDateTime.now();
+
 	
 
 	public int getLevel(){
@@ -80,7 +85,7 @@ public class User implements UserDetails {
 	}
 	@Override
 	public boolean isEnabled() {
-		return true;
+		return !deleted;
 	}
 
 }
