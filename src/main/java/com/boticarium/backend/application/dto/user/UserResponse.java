@@ -12,6 +12,8 @@ public record UserResponse(
 		Role role,
 		Integer points,
 		LocalDateTime createdAt,
-		Integer level
+		Integer level,
+		boolean deleted,
+		LocalDateTime deletedAt
 ) {
 }

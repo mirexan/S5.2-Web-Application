@@ -22,9 +22,12 @@ public class UserController {
 	private final UserService userService;
 
 	@GetMapping
-	public ResponseEntity<List<UserResponse>> getAllUsers(@AuthenticationPrincipal User actualUser) {
+	public ResponseEntity<List<UserResponse>> getAllUsers(
+			@AuthenticationPrincipal User actualUser,
+			@RequestParam(name = "includeDeleted", defaultValue = "false") boolean includeDeleted
+	) {
 		if (actualUser.getRole() == Role.ADMIN) {
-			return ResponseEntity.ok(userService.getAllUsers());
+			return ResponseEntity.ok(userService.getAllUsers(includeDeleted));
 		}
 		throw new AccessDeniedException("Access denied : you dont have permission " +
 				"to access this resource");

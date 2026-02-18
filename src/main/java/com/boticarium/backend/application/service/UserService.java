@@ -30,6 +30,15 @@ public class UserService {
 				.toList();
 	}
 
+	public List<UserResponse> getAllUsers(boolean includeDeleted) {
+		List<User> users = includeDeleted
+				? userRepository.findAll()
+				: userRepository.findAllByDeletedFalse();
+		return users.stream()
+				.map(this::mapToUserResponse)
+				.toList();
+	}
+
 	public UserResponse getUserById(Long id) {
 		User user = findUserOrThrow(id);
 		return mapToUserResponse(user);
@@ -103,7 +112,9 @@ public class UserService {
 				user.getRole(),
 				user.getPoints(),
 				user.getCreatedAt(),
-				user.getLevel()
+				user.getLevel(),
+				user.isDeleted(),
+				user.getDeletedAt()
 		);
 	}
 }

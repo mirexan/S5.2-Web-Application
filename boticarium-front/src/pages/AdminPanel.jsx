@@ -16,6 +16,7 @@ function AdminPanel() {
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [users, setUsers] = useState([]);
+  const [showDeletedUsers, setShowDeletedUsers] = useState(false);
   const [expandedUserId, setExpandedUserId] = useState(null);
   const [currentOrderPage, setCurrentOrderPage] = useState(0);
   const [totalOrderPages, setTotalOrderPages] = useState(0);
@@ -54,7 +55,7 @@ function AdminPanel() {
     }
     fetchProducts();
     fetchOrders(0);
-    fetchUsers();
+    fetchUsers(showDeletedUsers);
   }, [navigate]);
 
   const handleAuthError = (err) => {
@@ -100,10 +101,10 @@ function AdminPanel() {
     }
   };
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (includeDeleted = showDeletedUsers) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${API_URL}/users`, {
+      const response = await axios.get(`${API_URL}/users?includeDeleted=${includeDeleted}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       setUsers(response.data);
@@ -321,6 +322,12 @@ function AdminPanel() {
     setPendingUserDeleteId(null);
   };
 
+  const handleToggleDeletedUsers = (e) => {
+    const includeDeleted = e.target.checked;
+    setShowDeletedUsers(includeDeleted);
+    fetchUsers(includeDeleted);
+  };
+
   const handleUpdateOrderStatus = async (orderId, newStatus) => {
     try {
       const token = localStorage.getItem('token');
@@ -340,6 +347,34 @@ function AdminPanel() {
       return;
     }
     window.open(`https://wa.me/${phone}`, '_blank');
+  };
+
+  const formatDateTime = (value) => {
+    if (!value) return 'N/A';
+    return new Date(value).toLocaleString('es-ES', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const getEstimatedOrderDeletionDate = (createdAt) => {
+    if (!createdAt) return null;
+
+    const oneYearAfterCreation = new Date(createdAt);
+    oneYearAfterCreation.setFullYear(oneYearAfterCreation.getFullYear() + 1);
+
+    // El scheduler corre cada dia a las 02:00; tomamos la primera ejecucion tras cumplir 1 año.
+    const scheduledDeletion = new Date(oneYearAfterCreation);
+    scheduledDeletion.setHours(2, 0, 0, 0);
+
+    if (oneYearAfterCreation > scheduledDeletion) {
+      scheduledDeletion.setDate(scheduledDeletion.getDate() + 1);
+    }
+
+    return scheduledDeletion;
   };
 
   if (loading) return <div style={{ padding: '20px' }}>⏳ Cargando...</div>;
@@ -777,7 +812,8 @@ function AdminPanel() {
                       <th style={{ padding: '10px', textAlign: 'left' }}>Usuario</th>
                       <th style={{ padding: '10px', textAlign: 'left' }}>Total</th>
                       <th style={{ padding: '10px', textAlign: 'left' }}>Estado</th>
-                      <th style={{ padding: '10px', textAlign: 'left' }}>Fecha</th>
+                      <th style={{ padding: '10px', textAlign: 'left' }}>Fecha pedido</th>
+                      <th style={{ padding: '10px', textAlign: 'left' }}>Borrado previsto</th>
                       <th style={{ padding: '10px', textAlign: 'center' }}>Acciones</th>
                     </tr>
                   </thead>
@@ -806,7 +842,10 @@ function AdminPanel() {
                             <option value="CANCELED">CANCELED</option>
                           </select>
                         </td>
-                        <td style={{ padding: '10px' }}>{new Date(order.createdAt).toLocaleDateString('es-ES')}</td>
+                        <td style={{ padding: '10px' }}>{formatDateTime(order.createdAt)}</td>
+                        <td style={{ padding: '10px' }}>
+                          {formatDateTime(getEstimatedOrderDeletionDate(order.createdAt))}
+                        </td>
                         <td style={{ padding: '10px', textAlign: 'center' }}>
                           <button
                             onClick={() => handleContactClient(order.user?.phone)}
@@ -885,7 +924,17 @@ function AdminPanel() {
       {/* PESTAÑA: USUARIOS */}
       {activeTab === 'users' && (
         <div>
-          <h2>👥 Gestión de Usuarios</h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+            <h2 style={{ margin: 0 }}>👥 Gestión de Usuarios</h2>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold', color: '#4d5e4b' }}>
+              <input
+                type="checkbox"
+                checked={showDeletedUsers}
+                onChange={handleToggleDeletedUsers}
+              />
+              Ver eliminados
+            </label>
+          </div>
           {users.length === 0 ? (
             <p style={{ color: '#666', fontSize: '16px' }}>No hay usuarios registrados</p>
           ) : (
@@ -898,6 +947,7 @@ function AdminPanel() {
                     <th style={{ padding: '10px', textAlign: 'left' }}>Usuario</th>
                     <th style={{ padding: '10px', textAlign: 'left' }}>Email</th>
                     <th style={{ padding: '10px', textAlign: 'left' }}>Rol</th>
+                    <th style={{ padding: '10px', textAlign: 'left' }}>Estado</th>
                     <th style={{ padding: '10px', textAlign: 'left' }}>Fecha Registro</th>
                     <th style={{ padding: '10px', textAlign: 'center' }}>Acciones</th>
                   </tr>
@@ -905,7 +955,7 @@ function AdminPanel() {
                 <tbody>
                   {users.map((user, idx) => (
                     <React.Fragment key={user.id}>
-                      <tr style={{ borderBottom: '1px solid #ddd', background: idx % 2 === 0 ? 'white' : '#f9f9f9' }}>
+                      <tr style={{ borderBottom: '1px solid #ddd', background: user.deleted ? '#fff3f3' : (idx % 2 === 0 ? 'white' : '#f9f9f9') }}>
                         <td style={{ padding: '10px', textAlign: 'center' }}>
                           <button
                             onClick={() => setExpandedUserId(expandedUserId === user.id ? null : user.id)}
@@ -936,6 +986,18 @@ function AdminPanel() {
                           </span>
                         </td>
                         <td style={{ padding: '10px' }}>
+                          <span style={{
+                            background: user.deleted ? '#f8d7da' : '#d4edda',
+                            color: user.deleted ? '#721c24' : '#155724',
+                            padding: '4px 8px',
+                            borderRadius: '4px',
+                            fontSize: '0.9em',
+                            fontWeight: 'bold'
+                          }}>
+                            {user.deleted ? 'ELIMINADO' : 'ACTIVO'}
+                          </span>
+                        </td>
+                        <td style={{ padding: '10px' }}>
                           {user.createdAt ? new Date(user.createdAt).toLocaleDateString('es-ES', { 
                             year: 'numeric',
                             month: 'long',
@@ -945,25 +1007,27 @@ function AdminPanel() {
                           }) : 'N/A'}
                         </td>
                         <td style={{ padding: '10px', textAlign: 'center' }}>
-                          <button
-                            onClick={() => handleDeleteUser(user.id)}
-                            style={{
-                              padding: '5px 10px',
-                              background: '#dc3545',
-                              color: 'white',
-                              border: 'none',
-                              borderRadius: '3px',
-                              cursor: 'pointer'
-                            }}
-                          >
-                            🗑️ Eliminar
-                          </button>
+                          {!user.deleted && (
+                            <button
+                              onClick={() => handleDeleteUser(user.id)}
+                              style={{
+                                padding: '5px 10px',
+                                background: '#dc3545',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '3px',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              🗑️ Eliminar
+                            </button>
+                          )}
                         </td>
                       </tr>
                       {/* FILA EXPANDIDA CON DETALLES */}
                       {expandedUserId === user.id && (
                         <tr style={{ background: '#f5f5f5', borderBottom: '2px solid #ddd' }}>
-                          <td colSpan="7" style={{ padding: '20px' }}>
+                          <td colSpan="8" style={{ padding: '20px' }}>
                             <div style={{ maxWidth: '600px' }}>
                               <h3 style={{ marginTop: '0', color: '#333' }}>📋 Detalles Completos</h3>
                               <div style={{
@@ -1013,6 +1077,18 @@ function AdminPanel() {
                                   <strong>Nivel:</strong>
                                   <p style={{ margin: '5px 0', color: '#666' }}>
                                     {user.level === 3 ? '🥇 Nivel 3 (500+ pts)' : user.level === 2 ? '🥈 Nivel 2 (200-499 pts)' : '🥉 Nivel 1 (0-199 pts)'}
+                                  </p>
+                                </div>
+                                <div>
+                                  <strong>Estado:</strong>
+                                  <p style={{ margin: '5px 0', color: '#666' }}>
+                                    {user.deleted ? 'Eliminado (soft delete)' : 'Activo'}
+                                  </p>
+                                </div>
+                                <div>
+                                  <strong>Fecha de Eliminación:</strong>
+                                  <p style={{ margin: '5px 0', color: '#666' }}>
+                                    {user.deletedAt ? new Date(user.deletedAt).toLocaleString('es-ES') : 'N/A'}
                                   </p>
                                 </div>
                                 <div>
