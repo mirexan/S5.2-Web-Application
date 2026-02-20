@@ -9,6 +9,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 import java.util.List;
 
@@ -20,8 +23,13 @@ public class ProductController {
 	private final ProductService service;
 
 	@GetMapping
-	public ResponseEntity<List<ProductResponse>> getAllProducts() {
-		return ResponseEntity.ok(service.getAllProductsPublic());
+	public ResponseEntity<Page<ProductResponse>> getAllProducts(
+		@RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "20") int size,
+        @RequestParam(defaultValue = "id") String sortBy,
+        @RequestParam(defaultValue = "asc") String sortDir
+	) {
+		return ResponseEntity.ok(service.getProductsPublicPage(page, size, sortBy, sortDir));
 	}
 
 	@GetMapping("/{id}")

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getAllProducts, getAllProductsAdmin } from '../services/productService';
+import { getAllProductsAdmin, getProductsPage } from '../services/productService';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { getLevel, isAdmin } from '../utils/jwtUtils';
@@ -17,6 +17,9 @@ function ProductList() {
     const [userLevel, setUserLevel] = useState(0);
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
     const [pendingProduct, setPendingProduct] = useState(null);
+    const [currentPage, setCurrentPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(1);
+    const pageSize = 20;
     const navigate = useNavigate();
     const location = useLocation();
     const { addToCart } = useCart();
@@ -66,16 +69,23 @@ function ProductList() {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
+                setLoading(true);
+                setError(null);
                 let data = [];
                 if (isAdminUser) {
                     try {
                         data = await getAllProductsAdmin();
+                        setTotalPages(1);
                     } catch (adminError) {
                         console.warn('Fallo al cargar productos admin, usando vista publica.', adminError);
-                        data = await getAllProducts();
+                        const pageData = await getProductsPage(currentPage, pageSize, 'id', 'asc');
+                        data = pageData?.content ?? [];
+                        setTotalPages(Math.max(pageData?.totalPages ?? 1, 1));
                     }
                 } else {
-                    data = await getAllProducts();
+                    const pageData = await getProductsPage(currentPage, pageSize, 'id', 'asc');
+                    data = pageData?.content ?? [];
+                    setTotalPages(Math.max(pageData?.totalPages ?? 1, 1));
                 }
                 setProducts(data);
                 // Inicializar cantidades a 1 para cada producto
@@ -94,7 +104,7 @@ function ProductList() {
             }
         };
         fetchProducts();
-    }, [location, isAdminUser]);
+    }, [location, isAdminUser, currentPage]);
 
     const handleQuantityChange = (productId, change) => {
         const product = products.find(p => p.id === productId);
@@ -464,6 +474,49 @@ function ProductList() {
                             </div>
                         ))}
                     </div>
+                    {!isAdminUser && totalPages > 1 && (
+                        <div style={{
+                            marginTop: '28px',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            gap: '12px'
+                        }}>
+                            <button
+                                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 0))}
+                                disabled={currentPage === 0}
+                                style={{
+                                    padding: '8px 14px',
+                                    border: '1px solid #cbb89b',
+                                    borderRadius: '8px',
+                                    background: currentPage === 0 ? '#ece4d9' : '#f7efe3',
+                                    color: '#5f4a34',
+                                    cursor: currentPage === 0 ? 'not-allowed' : 'pointer',
+                                    fontWeight: '600'
+                                }}
+                            >
+                                Anterior
+                            </button>
+                            <span style={{ color: '#5f4a34', fontWeight: '600' }}>
+                                Página {currentPage + 1} de {totalPages}
+                            </span>
+                            <button
+                                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages - 1))}
+                                disabled={currentPage >= totalPages - 1}
+                                style={{
+                                    padding: '8px 14px',
+                                    border: '1px solid #cbb89b',
+                                    borderRadius: '8px',
+                                    background: currentPage >= totalPages - 1 ? '#ece4d9' : '#f7efe3',
+                                    color: '#5f4a34',
+                                    cursor: currentPage >= totalPages - 1 ? 'not-allowed' : 'pointer',
+                                    fontWeight: '600'
+                                }}
+                            >
+                                Siguiente
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
 

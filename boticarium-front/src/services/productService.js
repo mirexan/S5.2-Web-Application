@@ -13,6 +13,30 @@ export const getAllProducts = async () => {
     }
 };
 
+export const getProductsPage = async (page = 0, size = 20, sortBy = 'id', sortDir = 'asc') => {
+    try {
+        const response = await axios.get(API_URL, {
+            params: { page, size, sortBy, sortDir }
+        });
+        const data = response.data;
+
+        if (Array.isArray(data)) {
+            return {
+                content: data,
+                totalPages: 1,
+                totalElements: data.length,
+                number: 0,
+                size: data.length
+            };
+        }
+
+        return data;
+    } catch (error) {
+        console.error('Error fetching products page:', error);
+        throw error;
+    }
+};
+
 export const getAllProductsAdmin = async () => {
     try {
         const token = localStorage.getItem('token');
