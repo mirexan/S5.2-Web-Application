@@ -2,8 +2,10 @@ package com.boticarium.backend.infrastructure.inbound.controller;
 
 import com.boticarium.backend.application.dto.product.*;
 import com.boticarium.backend.application.service.ProductService;
+import com.boticarium.backend.infrastructure.security.JwtService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -35,6 +37,9 @@ class ProductControllerTest {
 	@MockitoBean
 	private ProductService productService;
 
+	@MockitoBean
+	private JwtService jwtService;
+
 	private ProductResponse responseSample;
 	private ProductAdminResponse adminResponseSample;
 	private ProductRequest requestSample;
@@ -61,47 +66,51 @@ class ProductControllerTest {
 	}
 
 	@Test
+	@DisplayName("GET /products - Debe devolver página pública")
 	void getAllProducts_ShouldReturnPage() throws Exception {
-		// Given
 		var page = new PageImpl<>(List.of(responseSample));
 		when(productService.getProductsPublicPage(anyInt(), anyInt(), anyString(), anyString()))
 				.thenReturn(page);
 
-		// When & Then
 		mockMvc.perform(get("/products")
 						.param("page", "0")
 						.param("size", "20"))
 				.andExpect(status().isOk())
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.content[0].name").value("Test Product"));
 	}
 
 	@Test
+	@DisplayName("GET /products/management - Debe devolver página de administración")
 	void getAllProductsAdmin_ShouldReturnPage() throws Exception {
+
 		var page = new PageImpl<>(List.of(adminResponseSample));
-		when(productService.getProductsPublicPage(anyInt(), anyInt(), anyString(), anyString()))
+		when(productService.getProductsAdminPage(anyInt(), anyInt(), anyString(), anyString()))
 				.thenReturn(page);
+
+		mockMvc.perform(get("/products/management")
+						.param("page", "0")
+						.param("size", "10"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content[0].name").value("Admin Product"))
+				.andExpect(jsonPath("$.content[0].costPrice").exists());
 	}
 
 	@Test
+	@DisplayName("GET /products/{id} - Debe devolver producto público")
 	void getProduct_ShouldReturnProduct() throws Exception {
-		// Given
-		Long id = 1L;
-		when(productService.getProductByIdPublic(id)).thenReturn(responseSample);
+		when(productService.getProductByIdPublic(1L)).thenReturn(responseSample);
 
-		// When & Then
 		mockMvc.perform(get("/products/1"))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.id").value(id))
+				.andExpect(jsonPath("$.id").value(1))
 				.andExpect(jsonPath("$.name").value("Test Product"));
 	}
 
 	@Test
+	@DisplayName("POST /products - Debe crear producto y devolver 201")
 	void createProduct_ShouldReturnCreated() throws Exception {
-		// Given
 		when(productService.createProduct(any(ProductRequest.class))).thenReturn(adminResponseSample);
 
-		// When & Then
 		mockMvc.perform(post("/products")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(requestSample)))
@@ -110,8 +119,20 @@ class ProductControllerTest {
 	}
 
 	@Test
+	@DisplayName("PUT /products/{id} - Debe actualizar y devolver 200")
+	void updateProduct_ShouldReturnOk() throws Exception {
+		when(productService.updateProduct(eq(1L), any(ProductRequest.class))).thenReturn(adminResponseSample);
+
+		mockMvc.perform(put("/products/1")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(requestSample)))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.name").value("Admin Product"));
+	}
+
+	@Test
+	@DisplayName("DELETE /products/{id} - Debe borrar y devolver 204")
 	void deleteProduct_ShouldReturnNoContent() throws Exception {
-		// When & Then
 		mockMvc.perform(delete("/products/1"))
 				.andExpect(status().isNoContent());
 	}

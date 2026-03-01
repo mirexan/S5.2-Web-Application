@@ -8,6 +8,7 @@ import com.boticarium.backend.domain.model.Product;
 import com.boticarium.backend.infrastructure.outbound.persistence.ProductRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -62,17 +63,6 @@ class ProductServiceTest {
 	}
 
 	@Test
-	void getAllProductsPublic_ShouldReturnList() {
-		when(repository.findAll()).thenReturn(List.of(productSample));
-		when(mapper.toPublicResponse(productSample)).thenReturn(responseSample);
-
-		List<ProductResponse> result = productService.getAllProductsPublic();
-
-		assertEquals(1, result.size());
-		verify(repository).findAll();
-	}
-
-	@Test
 	void getProductsPublicPage_ShouldReturnPage() {
 		int page = 0, size = 10;
 		String sortBy = "name", sortDir = "asc";
@@ -86,6 +76,25 @@ class ProductServiceTest {
 
 		assertNotNull(result);
 		verify(repository).findAll(pageable);
+	}
+	@Test
+	void getProductsAdminPage_ShouldReturnPage() {
+		// Arrange
+		int page = 0, size = 10;
+		String sortBy = "id", sortDir = "desc";
+		Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy).descending());
+		Page<Product> productPage = new PageImpl<>(List.of(productSample));
+
+		when(repository.findAll(any(Pageable.class))).thenReturn(productPage);
+		when(mapper.toAdminResponse(any())).thenReturn(adminResponseSample);
+
+		// Act
+		Page<ProductAdminResponse> result = productService.getProductsAdminPage(page, size, sortBy, sortDir);
+
+		// Assert
+		assertNotNull(result);
+		verify(repository).findAll(pageable);
+		verify(mapper).toAdminResponse(any());
 	}
 
 	@Test
