@@ -30,13 +30,6 @@ public class ProductService {
 	private final ProductMapper mapper;
 	private final ProductRepository repository;
 
-	@Cacheable("products_public_list")
-	public List<ProductResponse> getAllProductsPublic() {
-		return repository.findAll().stream()
-				.map(mapper::toPublicResponse)
-				.collect(Collectors.toList());
-	}
-
 	@Cacheable(value = "products_public_page", key = "#page + '-' + #size + '-' + #sortBy + '-' + #sortDir")
 	public Page<ProductResponse> getProductsPublicPage(int page, int size, String sortBy, String sortDir) {
 		Sort sort = sortDir.equalsIgnoreCase("desc")
@@ -47,8 +40,18 @@ public class ProductService {
 
 		return repository.findAll(pageable)
 				.map(mapper::toPublicResponse);
-}
+	}
 
+	public Page<ProductAdminResponse> getProductsAdminPage(int page, int size, String sortBy, String sortDir) {
+		Sort sort = sortDir.equalsIgnoreCase("desc")
+				? Sort.by(sortBy).descending()
+				: Sort.by(sortBy).ascending();
+
+		Pageable pageable = PageRequest.of(page, size, sort);
+
+		return repository.findAll(pageable)
+				.map(mapper::toAdminResponse); // Usamos el mapper de admin
+	}
 
 	@Cacheable("product_public_by_id")
 	public ProductResponse getProductByIdPublic(Long id) {
@@ -82,9 +85,9 @@ public class ProductService {
 		return mapper.toAdminResponse(repository.save(actualProduct));
 	}
 
-	@CacheEvict(cacheNames = {"products_public_list", "product_public_by_id","products_public_page"}, allEntries = true)
+	@CacheEvict(cacheNames = {"products_public_list", "product_public_by_id", "products_public_page"}, allEntries = true)
 	public void deleteProduct(Long id) {
-		if(!repository.existsById(id)) {
+		if (!repository.existsById(id)) {
 			throw new EntityNotFoundException("Product not found");
 		}
 		repository.deleteById(id);

@@ -38,8 +38,13 @@ public class ProductController {
 	}
 
 	@GetMapping("/management")
-	public ResponseEntity<List<ProductAdminResponse>> getAllProductsAdmin() {
-		return ResponseEntity.ok(service.getAllProductsAdmin());
+	public ResponseEntity<Page<ProductAdminResponse>> getAllProductsAdmin(
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "20") int size,
+			@RequestParam(defaultValue = "id") String sortBy,
+			@RequestParam(defaultValue = "asc") String sortDir
+	) {
+		return ResponseEntity.ok(service.getProductsAdminPage(page, size, sortBy, sortDir));
 	}
 
 	@GetMapping("/management/{id}")
