@@ -71,39 +71,48 @@ function ProductList() {
             try {
                 setLoading(true);
                 setError(null);
-                let data = [];
+                let rawResponse;
+
                 if (isAdminUser) {
                     try {
-                        data = await getAllProductsAdmin();
-                        setTotalPages(1);
+                        rawResponse = await getAllProductsAdmin();
+                        // Si el backend de admin devuelve Page, extraemos content.
+                        // Si devuelve List, lo usamos directamente.
+                        const products = Array.isArray(rawResponse) ? rawResponse : rawResponse?.content;
+                        const total = Array.isArray(rawResponse) ? 1 : (rawResponse?.totalPages || 1);
+
+                        setProducts(products || []);
+                        setTotalPages(total);
+                        initializeQuantities(products || []); // Función extraída para limpiar el código
                     } catch (adminError) {
-                        console.warn('Fallo al cargar productos admin, usando vista publica.', adminError);
-                        const pageData = await getProductsPage(currentPage, pageSize, 'id', 'asc');
-                        data = pageData?.content ?? [];
-                        setTotalPages(Math.max(pageData?.totalPages ?? 1, 1));
+                        console.warn('Fallo admin, usando vista pública', adminError);
+                        await loadPublicPage();
                     }
                 } else {
-                    const pageData = await getProductsPage(currentPage, pageSize, 'id', 'asc');
-                    data = pageData?.content ?? [];
-                    setTotalPages(Math.max(pageData?.totalPages ?? 1, 1));
+                    await loadPublicPage();
                 }
-                setProducts(data);
-                // Inicializar cantidades a 1 para cada producto
-                const initialQuantities = {};
-                data.forEach(product => {
-                    initialQuantities[product.id] = 1;
-                });
-                setQuantities(initialQuantities);
-            } 
-            catch (err) {
-                console.error(err);
-                setError('Error fetching products (Revise if backend is running)');
-            } 
-            finally {
+            } catch (err) {
+                setError('Error fetching products');
+            } finally {
                 setLoading(false);
             }
         };
-        fetchProducts();
+
+// Función de ayuda para no repetir lógica
+        const loadPublicPage = async () => {
+            const pageData = await getProductsPage(currentPage, pageSize, 'id', 'asc');
+            const content = pageData?.content ?? [];
+            setProducts(content);
+            setTotalPages(pageData?.totalPages ?? 1);
+            initializeQuantities(content);
+        };
+
+        const initializeQuantities = (data) => {
+            if (!Array.isArray(data)) return;
+            const initial = {};
+            data.forEach(p => initial[p.id] = 1);
+            setQuantities(initial);
+        };        fetchProducts();
     }, [location, isAdminUser, currentPage]);
 
     const handleQuantityChange = (productId, change) => {
