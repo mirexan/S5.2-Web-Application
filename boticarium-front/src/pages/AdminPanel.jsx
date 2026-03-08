@@ -119,7 +119,7 @@ function AdminPanel() {
     try {
       setLoading(true);
       const data = await getAllProductsAdmin();
-      setProducts(data);
+      setProducts(Array.isArray(data) ? data : []);
     } catch (err) {
       if (handleAuthError(err)) return;
       showToast('Error cargando productos (admin)', 'error');

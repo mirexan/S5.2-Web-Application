@@ -43,7 +43,14 @@ export const getAllProductsAdmin = async () => {
         const response = await axios.get(`${API_URL}/management`, {
             headers: token ? { 'Authorization': `Bearer ${token}` } : {}
         });
-        return response.data;
+        const data = response.data;
+
+        // Compatibilidad: backend puede devolver List<Product> o Page<Product>
+        if (Array.isArray(data)) {
+            return data;
+        }
+
+        return Array.isArray(data?.content) ? data.content : [];
     } catch (error) {
         console.error('Error fetching admin products:', error);
         throw error;
